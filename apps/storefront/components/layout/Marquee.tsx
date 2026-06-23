@@ -19,7 +19,7 @@ export default function Marquee() {
             {PHRASES.map((phrase, i) => (
               <span
                 key={i}
-                className="mx-8 text-[11px] sm:text-xs uppercase tracking-wider text-gray-600"
+                className="mx-8 text-[11px] sm:text-xs uppercase tracking-wider font-medium text-gray-800"
               >
                 {phrase}
               </span>

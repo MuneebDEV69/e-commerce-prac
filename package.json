@@ -7,8 +7,8 @@
     "packages/*"
   ],
   "scripts": {
-    "dev": "cd apps/storefront && next dev",
-    "build": "cd apps/storefront && next build",
-    "start": "cd apps/storefront && next start"
+    "dev": "npm run dev --prefix apps/storefront --workspaces=false",
+    "build": "npm run build --prefix apps/storefront --workspaces=false",
+    "start": "npm run start --prefix apps/storefront --workspaces=false"
   }
 }

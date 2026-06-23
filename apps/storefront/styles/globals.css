@@ -2,7 +2,13 @@
 @tailwind components;
 @tailwind utilities;
 
-html, body { height: 100%; }
+/* NOTE: do NOT set height:100% on html/body — it constrains the body box to one
+   viewport, which breaks `position: sticky` (the sticky header would unpin once you
+   scroll past ~100vh). Let the document grow to its full content height. */
 body { background-color: white; }
 
 .brand-button { background-color: theme('colors.brand.DEFAULT'); }
+
+/* Hide native scrollbars for custom horizontal carousels */
+.scrollbar-none { -ms-overflow-style: none; scrollbar-width: none; }
+.scrollbar-none::-webkit-scrollbar { display: none; }

@@ -1,23 +1,44 @@
-import Image from 'next/image'
+'use client'
+
+import { useEffect, useState } from 'react'
 import { Menu, Search, User, ShoppingBag } from 'lucide-react'
 
 /**
- * Global site header — Araish-style.
- * Layer 1: gold announcement bar.
- * Layer 2: clean white sticky navbar (hamburger left, centered logo, utilities right).
- * The grey marquee ticker (Layer 3) is a separate <Marquee /> component rendered below this.
+ * Global site header.
+ *
+ * Returns a fragment (no wrapper element) so the sticky <nav> is a direct child of
+ * <body>. That matters: `position: sticky` only stays pinned within its parent's box,
+ * so the nav must sit directly in the tall body — not inside a short wrapper — to
+ * remain visible no matter how far you scroll.
+ *
+ * Layer 1 (announcement bar) is in normal flow and scrolls away.
+ * Layer 2 (nav) is sticky and stays. The logo shrinks on scroll-down and grows back
+ * on scroll-up via the `scrolled` flag — a smooth Araish-style animation.
  */
 export default function Header() {
+  const [scrolled, setScrolled] = useState(false)
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 40)
+    onScroll()
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => window.removeEventListener('scroll', onScroll)
+  }, [])
+
   return (
-    <header className="sticky top-0 z-50 bg-white">
-      {/* Layer 1 — Announcement bar */}
-      <div className="bg-brand text-white text-center text-[11px] sm:text-xs tracking-wide py-2 px-4">
+    <>
+      {/* Layer 1 — Announcement bar (scrolls away) */}
+      <div className="bg-brand text-white text-center text-sm sm:text-base tracking-wide py-2.5 px-4">
         Enjoy Free Shipping on Orders Above PKR 5,000.
       </div>
 
-      {/* Layer 2 — Main navbar */}
-      <nav className="border-b border-gray-100">
-        <div className="grid grid-cols-3 items-center px-4 sm:px-6 lg:px-10 h-16">
+      {/* Layer 2 — Sticky nav */}
+      <nav className="sticky top-0 z-50 bg-white/95 backdrop-blur-sm border-b border-gray-100">
+        <div
+          className={`grid grid-cols-3 items-center px-4 sm:px-6 lg:px-10 transition-all duration-300 ${
+            scrolled ? 'h-16' : 'h-24'
+          }`}
+        >
           {/* Left — hamburger */}
           <div className="flex items-center">
             <button aria-label="Open menu" className="p-2 -ml-2 text-gray-800 hover:text-brand transition-colors">
@@ -25,16 +46,24 @@ export default function Header() {
             </button>
           </div>
 
-          {/* Center — logo */}
+          {/* Center — glamorous animated wordmark */}
           <div className="flex justify-center">
-            <Image
-              src="/images/logo.png"
-              alt="ARAISH"
-              width={150}
-              height={40}
-              priority
-              className="h-8 w-auto object-contain"
-            />
+            <a href="#" aria-label="MUNEEB KI ARAISH — home" className="group select-none text-center leading-none">
+              <span
+                className={`block font-serif font-semibold uppercase bg-gradient-to-r from-[#b8860b] via-brand to-[#dcb878] bg-clip-text text-transparent drop-shadow-sm transition-all duration-300 ${
+                  scrolled
+                    ? 'text-xl sm:text-2xl tracking-[0.25em]'
+                    : 'text-2xl sm:text-4xl tracking-[0.3em]'
+                }`}
+              >
+                Muneeb&nbsp;Ki&nbsp;Araish
+              </span>
+              <span
+                className={`mx-auto mt-1 block h-px bg-gradient-to-r from-transparent via-brand to-transparent transition-all duration-300 ${
+                  scrolled ? 'w-0 opacity-0' : 'w-2/3 opacity-100'
+                }`}
+              />
+            </a>
           </div>
 
           {/* Right — utilities */}
@@ -51,6 +80,6 @@ export default function Header() {
           </div>
         </div>
       </nav>
-    </header>
+    </>
   )
 }
