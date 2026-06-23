@@ -11,3 +11,4 @@ function mockApiResponse() {
 
 // Usage
 console.log(mockApiResponse());
+console.log(mockApiResponse());
