@@ -1,8 +1,10 @@
-import './globals.css'
+import '../styles/globals.css'
 import React from 'react'
+import Header from '../components/layout/Header'
+import Marquee from '../components/layout/Marquee'
 
 export const metadata = {
-  title: 'Storefront',
+  title: 'Araish — Premium Luxury Bedding',
   description: 'Araish-inspired storefront prototype'
 }
 
@@ -10,17 +12,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en">
       <body className="antialiased font-sans bg-white text-black">
-        <header className="border-b">
-          <div className="bg-brand py-2 text-white text-center text-sm">Enjoy Free Shipping on Orders Above PKR 5,000</div>
-          <div className="flex items-center justify-between p-4">
-            <div className="w-1/4">☰</div>
-            <div className="text-2xl font-serif">Araish‑Like</div>
-            <div className="w-1/4 flex justify-end space-x-4">🔍 👤 🛒</div>
-          </div>
-          <div className="overflow-hidden text-sm text-gray-600 py-2">
-            <div className="animate-marquee whitespace-nowrap">Established 1954 — Free Shipping over PKR 5,000 — Premium Luxury Bedding since 2016</div>
-          </div>
-        </header>
+        <Header />
+        <Marquee />
 
         <main className="min-h-screen">{children}</main>
 
@@ -45,11 +38,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             </div>
           </div>
         </footer>
-
-        <style>{`
-          .animate-marquee { display:inline-block; transform:translateX(0); animation: marquee 18s linear infinite; }
-          @keyframes marquee { 0% { transform: translateX(100%);} 100% { transform: translateX(-100%);} }
-        `}</style>
       </body>
     </html>
   )
