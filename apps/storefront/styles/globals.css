@@ -1,0 +1,8 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html, body { height: 100%; }
+body { background-color: white; }
+
+.brand-button { background-color: theme('colors.brand.DEFAULT'); }

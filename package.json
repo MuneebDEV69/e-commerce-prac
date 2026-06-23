@@ -1,0 +1,14 @@
+{
+  "name": "ecom-monorepo",
+  "private": true,
+  "version": "1.0.0",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "cd apps/storefront && next dev",
+    "build": "cd apps/storefront && next build",
+    "start": "cd apps/storefront && next start"
+  }
+}
