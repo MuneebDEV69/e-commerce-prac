@@ -1,15 +1,15 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   content: [
-    "./app/**/*.{ts,tsx}",
-    "./components/**/*.{ts,tsx}",
+    "./src/app/**/*.{ts,tsx}",
+    "./src/components/**/*.{ts,tsx}",
     "../../packages/ui/**/*.{ts,tsx}"
   ],
   theme: {
     extend: {
       colors: {
         brand: {
-          DEFAULT: '#c89855', // signature gold/mustard
+          DEFAULT: '#c89855',
           dark: '#a87d3f',
           light: '#d4a373'
         },

@@ -1,7 +1,9 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import Link from 'next/link'
 import { Menu, Search, User, ShoppingBag } from 'lucide-react'
+import NavMenu from './NavMenu'
 
 /**
  * Global site header.
@@ -17,6 +19,7 @@ import { Menu, Search, User, ShoppingBag } from 'lucide-react'
  */
 export default function Header() {
   const [scrolled, setScrolled] = useState(false)
+  const [menuOpen, setMenuOpen] = useState(false)
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 40)
@@ -41,14 +44,18 @@ export default function Header() {
         >
           {/* Left — hamburger */}
           <div className="flex items-center">
-            <button aria-label="Open menu" className="p-2 -ml-2 text-gray-800 hover:text-brand transition-colors">
+            <button
+              onClick={() => setMenuOpen(true)}
+              aria-label="Open menu"
+              className="p-2 -ml-2 text-gray-800 hover:text-brand transition-colors"
+            >
               <Menu size={22} strokeWidth={1.5} />
             </button>
           </div>
 
           {/* Center — glamorous animated wordmark */}
           <div className="flex justify-center">
-            <a href="#" aria-label="MUNEEB KI ARAISH — home" className="group select-none text-center leading-none">
+            <Link href="/" aria-label="MUNEEB KI ARAISH — home" className="group select-none text-center leading-none">
               <span
                 className={`block font-serif font-semibold uppercase bg-gradient-to-r from-[#b8860b] via-brand to-[#dcb878] bg-clip-text text-transparent drop-shadow-sm transition-all duration-300 ${
                   scrolled
@@ -63,23 +70,25 @@ export default function Header() {
                   scrolled ? 'w-0 opacity-0' : 'w-2/3 opacity-100'
                 }`}
               />
-            </a>
+            </Link>
           </div>
 
           {/* Right — utilities */}
           <div className="flex items-center justify-end gap-4 sm:gap-6 text-gray-800">
-            <button aria-label="Search" className="hover:text-brand transition-colors">
+            <Link href="/shop" aria-label="Search" className="hover:text-brand transition-colors">
               <Search size={20} strokeWidth={1.5} />
-            </button>
+            </Link>
             <button aria-label="Account" className="hover:text-brand transition-colors">
               <User size={20} strokeWidth={1.5} />
             </button>
-            <button aria-label="Shopping bag" className="hover:text-brand transition-colors">
+            <Link href="/shop" aria-label="Shopping bag" className="hover:text-brand transition-colors">
               <ShoppingBag size={20} strokeWidth={1.5} />
-            </button>
+            </Link>
           </div>
         </div>
       </nav>
+
+      <NavMenu open={menuOpen} onClose={() => setMenuOpen(false)} />
     </>
   )
 }

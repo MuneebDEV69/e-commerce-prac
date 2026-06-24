@@ -1,14 +1,14 @@
 'use client'
 
-import { useRef, useState, useEffect, useCallback } from 'react'
+import { useRef, useState, useCallback } from 'react'
 import { ChevronLeft, ChevronRight, Volume2, VolumeX } from 'lucide-react'
 
 /**
  * "#INDULGENCE, THE ARAISH WAY" — vertical 9:16 video reels carousel.
  *
- * Scroll tracking: IntersectionObserver watches each card so the active dot
- * always reflects the card that is most visible — clicking a dot scrolls to
- * that card. The < / > arrows scroll by exactly one card width.
+ * Scroll tracking: the active dot is derived directly from the track's scrollLeft
+ * (instant, no observer lag). Arrows and dots scroll the track to index * step,
+ * where step is the exact card pitch (card width + gap) measured from the DOM.
  *
  * Per-card mute toggle: each card tracks its own muted state. On mount all
  * videos start muted (browser autoplay policy requires this). Clicking the
@@ -35,36 +35,30 @@ export default function VideoReels() {
   // index of the currently unmuted video (-1 = all muted)
   const [unmutedIndex, setUnmutedIndex] = useState(-1)
 
-  // IntersectionObserver: whichever card has the greatest intersection becomes active dot
-  useEffect(() => {
-    const observers: IntersectionObserver[] = []
+  // Exact card pitch in px (card width + gap), measured from the first two cards.
+  const stepSize = () => {
+    const a = cardRefs.current[0]
+    const b = cardRefs.current[1]
+    if (a && b) return b.offsetLeft - a.offsetLeft
+    return a ? a.offsetWidth : 0
+  }
 
-    cardRefs.current.forEach((card, i) => {
-      if (!card) return
-      const obs = new IntersectionObserver(
-        ([entry]) => {
-          if (entry.isIntersecting && entry.intersectionRatio >= 0.5) {
-            setActiveIndex(i)
-          }
-        },
-        { root: trackRef.current, threshold: 0.5 }
-      )
-      obs.observe(card)
-      observers.push(obs)
-    })
-
-    return () => observers.forEach((o) => o.disconnect())
-  }, [])
-
+  // Scroll the track so card `index` sits at the left edge.
   const scrollToCard = useCallback((index: number) => {
-    const card = cardRefs.current[index]
-    if (!card) return
-    card.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' })
+    const el = trackRef.current
+    if (!el) return
+    const i = Math.max(0, Math.min(REELS.length - 1, index))
+    el.scrollTo({ left: i * stepSize(), behavior: 'smooth' })
   }, [])
 
-  const scrollByOne = (dir: 1 | -1) => {
-    const next = Math.max(0, Math.min(REELS.length - 1, activeIndex + dir))
-    scrollToCard(next)
+  const scrollByOne = (dir: 1 | -1) => scrollToCard(activeIndex + dir)
+
+  // Derive the active dot from scroll position — instant, no observer lag.
+  const onTrackScroll = () => {
+    const el = trackRef.current
+    const step = stepSize()
+    if (!el || !step) return
+    setActiveIndex(Math.round(el.scrollLeft / step))
   }
 
   const toggleMute = (index: number) => {
@@ -110,13 +104,14 @@ export default function VideoReels() {
       {/* Scrollable track */}
       <div
         ref={trackRef}
+        onScroll={onTrackScroll}
         className="flex gap-4 md:gap-5 overflow-x-auto snap-x snap-mandatory scrollbar-none scroll-smooth"
       >
         {REELS.map((src, i) => (
           <div
             key={src}
             ref={(el) => { cardRefs.current[i] = el }}
-            className="relative shrink-0 snap-center w-[220px] sm:w-[240px] md:w-[270px] aspect-[9/16] rounded-2xl overflow-hidden bg-gray-900"
+            className="relative shrink-0 snap-start w-[220px] sm:w-[240px] md:w-[270px] aspect-[9/16] rounded-2xl overflow-hidden bg-gray-900"
           >
             <video
               ref={(el) => { videoRefs.current[i] = el }}

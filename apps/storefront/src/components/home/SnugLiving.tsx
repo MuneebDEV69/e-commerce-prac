@@ -1,4 +1,5 @@
 import Image from 'next/image'
+import Link from 'next/link'
 
 /**
  * "SNUG & STYLISH LIVING" — 3-column feature grid with a two-tone split background.
@@ -29,12 +30,12 @@ export default function SnugLiving() {
       {/* Top half mustard — bottom half is the section's off-white background */}
       <div className="absolute inset-x-0 top-0 h-1/2 bg-brand" aria-hidden />
 
-      <div className="relative z-10 max-w-7xl mx-auto px-4 md:px-8 pb-16">
+      <div className="relative z-10 max-w-[1550px] mx-auto px-4 md:px-6 pb-16">
         <h2 className="text-center text-white text-2xl sm:text-3xl tracking-[0.2em] pt-12 pb-10">
           SNUG &amp; STYLISH LIVING
         </h2>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-10">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-5 md:gap-6">
           {FEATURES.map((item) => (
             <div key={item.title} className="flex flex-col">
               <div className="relative aspect-[4/5] w-full overflow-hidden shadow-xl">
@@ -54,12 +55,12 @@ export default function SnugLiving() {
                 <p className="mt-3 text-xs leading-relaxed text-gray-600 max-w-xs mx-auto">
                   {item.desc}
                 </p>
-                <a
-                  href="#"
+                <Link
+                  href="/shop"
                   className="mt-4 inline-block text-brand text-[11px] tracking-[0.2em] border-b border-brand pb-0.5 hover:text-brand-dark hover:border-brand-dark transition-colors"
                 >
                   SHOP NOW →
-                </a>
+                </Link>
               </div>
             </div>
           ))}

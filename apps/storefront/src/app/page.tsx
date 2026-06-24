@@ -4,6 +4,8 @@ import FeatureShowcase from '../components/home/FeatureShowcase'
 import SnugLiving from '../components/home/SnugLiving'
 import DiningSection from '../components/home/DiningSection'
 import VideoReels from '../components/home/VideoReels'
+import LastChance from '../components/home/LastChance'
+import InstagramSection from '../components/home/InstagramSection'
 
 export default function Home() {
   return (
@@ -14,8 +16,8 @@ export default function Home() {
       <SnugLiving />
       <DiningSection />
       <VideoReels />
-
-      {/* Next: Last Chance banner + Instagram feed + footer. */}
+      <LastChance />
+      <InstagramSection />
     </>
   )
 }

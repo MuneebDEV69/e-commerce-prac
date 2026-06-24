@@ -1,4 +1,5 @@
 import Image from 'next/image'
+import Link from 'next/link'
 
 /**
  * "DINING" — asymmetrical split layout.
@@ -16,9 +17,12 @@ export default function DiningSection() {
             Elegant cotton table linens for every occasion, from everyday meals to formal
             dining. Tablecloths, runners, and napkins available for 4 to 12-seater tables.
           </p>
-          <button className="mt-7 bg-brand text-white text-xs tracking-[0.2em] px-10 py-3 hover:bg-brand-dark transition-colors">
+          <Link
+            href="/shop"
+            className="mt-7 inline-block bg-brand text-white text-xs tracking-[0.2em] px-10 py-3 hover:bg-brand-dark transition-colors"
+          >
             BUY NOW
-          </button>
+          </Link>
         </div>
 
         {/* Right — full-bleed image to the screen edge */}

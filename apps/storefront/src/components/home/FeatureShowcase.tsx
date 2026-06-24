@@ -1,4 +1,5 @@
 import Image from 'next/image'
+import Link from 'next/link'
 
 /**
  * Overlapping editorial feature section (Bedding & Cushions).
@@ -31,18 +32,24 @@ export default function FeatureShowcase() {
               Cushions that bring comfort and a gentle touch of personality to your
               space. Made from soft duck cotton and textured jute canvas.
             </p>
-            <button className="mt-6 bg-brand text-white text-xs tracking-[0.2em] px-10 py-3 hover:bg-brand-dark transition-colors">
+            <Link
+              href="/shop"
+              className="mt-6 inline-block bg-brand text-white text-xs tracking-[0.2em] px-10 py-3 hover:bg-brand-dark transition-colors"
+            >
               CUSHIONS
-            </button>
+            </Link>
           </div>
         </div>
 
         {/* RIGHT COLUMN — bedding copy, then overlapping cushion image */}
         <div className="flex flex-col">
           <div className="max-w-md md:pt-24 md:pl-6">
-            <button className="bg-brand text-white text-xs tracking-[0.2em] px-7 py-2.5">
+            <Link
+              href="/shop"
+              className="inline-block bg-brand text-white text-xs tracking-[0.2em] px-7 py-2.5 hover:bg-brand-dark transition-colors"
+            >
               BEDDING
-            </button>
+            </Link>
             <p className="mt-5 text-sm leading-relaxed text-gray-500">
               Soft, breathable bedding sets in fresh, beautiful designs, finished with
               delicate embroidery and thoughtful contrasts. Made from 100% cotton,

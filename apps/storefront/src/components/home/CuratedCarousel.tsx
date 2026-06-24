@@ -2,6 +2,7 @@
 
 import { useRef, useState, useEffect } from 'react'
 import Image from 'next/image'
+import Link from 'next/link'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 
 /**
@@ -86,18 +87,24 @@ export default function CuratedCarousel() {
         className="flex gap-5 md:gap-6 overflow-x-auto px-4 md:px-12 snap-x scrollbar-none scroll-smooth"
       >
         {CATEGORIES.map((cat) => (
-          <div key={cat.label} className="shrink-0 snap-center w-[230px] md:w-[280px]">
+          <Link
+            key={cat.label}
+            href="/shop"
+            className="shrink-0 snap-center w-[230px] md:w-[280px] group"
+          >
             <div className="relative aspect-square w-full overflow-hidden rounded-md">
               <Image
                 src={cat.src}
                 alt={cat.label}
                 fill
                 sizes="(max-width: 768px) 230px, 280px"
-                className="object-cover"
+                className="object-cover transition-transform duration-500 group-hover:scale-105"
               />
             </div>
-            <p className="mt-3 text-center text-xs tracking-widest text-gray-700">{cat.label}</p>
-          </div>
+            <p className="mt-3 text-center text-xs tracking-widest text-gray-700 group-hover:text-brand transition-colors">
+              {cat.label}
+            </p>
+          </Link>
         ))}
       </div>
 
