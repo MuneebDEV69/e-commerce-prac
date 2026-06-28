@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 declare module '*.css'
 declare module '*.scss'
 declare module '*.module.css'
