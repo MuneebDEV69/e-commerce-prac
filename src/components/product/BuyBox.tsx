@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, type ReactNode } from 'react'
 import { Minus, Plus, ChevronDown } from 'lucide-react'
 import { type Product, formatPrice } from '../../lib/products'
 
@@ -14,7 +14,7 @@ function PillGroup({
   label: string
   options: string[]
   value: string
-  onChange: (v: string) => void
+  onChange: (_nextValue: string) => void
 }) {
   return (
     <div>
@@ -41,7 +41,7 @@ function PillGroup({
   )
 }
 
-function Accordion({ title, children }: { title: string; children: React.ReactNode }) {
+function Accordion({ title, children }: { title: string; children: ReactNode }) {
   const [open, setOpen] = useState(false)
   return (
     <div className="border-t border-gray-200">
