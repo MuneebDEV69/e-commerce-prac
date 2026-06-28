@@ -7,3 +7,11 @@ What was scaffolded:
 - `packages/ui` and `packages/domain` - placeholder shared packages
 
 Run `npm install` and `npm run dev` in `apps/storefront` after installing dependencies.
+
+```
+npm run dev          # frontend
+npm run build        # production build
+npm run db:seed      # seed database
+npm run db:studio    # data GUI
+npm run db:generate  # regenerate prisma client
+```
