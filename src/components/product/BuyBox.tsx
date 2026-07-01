@@ -58,9 +58,9 @@ function Accordion({ title, children }: { title: string; children: ReactNode }) 
 }
 
 export default function BuyBox({ product }: { product: Product }) {
-  const [size, setSize] = useState(product.sizes[0])
-  const [fabric, setFabric] = useState(product.fabrics[0])
-  const [color, setColor] = useState(product.colors[0])
+  const [size, setSize] = useState(product.sizes[0] ?? '')
+  const [fabric, setFabric] = useState(product.fabrics[0] ?? '')
+  const [color, setColor] = useState(product.colors[0] ?? '')
   const [qty, setQty] = useState(1)
   const [addOns, setAddOns] = useState<Set<string>>(new Set())
 
@@ -83,12 +83,20 @@ export default function BuyBox({ product }: { product: Product }) {
         Disclaimer: actual colors may slightly vary due to lighting and screen settings.
       </p>
 
-      {/* Variant selectors */}
-      <div className="mt-6 space-y-5">
-        <PillGroup label="Size" options={product.sizes} value={size} onChange={setSize} />
-        <PillGroup label="Fabric" options={product.fabrics} value={fabric} onChange={setFabric} />
-        <PillGroup label="Color" options={product.colors} value={color} onChange={setColor} />
-      </div>
+      {/* Variant selectors — only shown when the product actually has options */}
+      {(product.sizes.length > 0 || product.fabrics.length > 0 || product.colors.length > 0) && (
+        <div className="mt-6 space-y-5">
+          {product.sizes.length > 0 && (
+            <PillGroup label="Size" options={product.sizes} value={size} onChange={setSize} />
+          )}
+          {product.fabrics.length > 0 && (
+            <PillGroup label="Fabric" options={product.fabrics} value={fabric} onChange={setFabric} />
+          )}
+          {product.colors.length > 0 && (
+            <PillGroup label="Color" options={product.colors} value={color} onChange={setColor} />
+          )}
+        </div>
+      )}
 
       {/* Quantity */}
       <div className="mt-6">
@@ -155,7 +163,11 @@ export default function BuyBox({ product }: { product: Product }) {
       {/* Accordions */}
       <div className="mt-8">
         <Accordion title="PRODUCT DETAILS">
-          <p>Fabric: {product.fabric}. Category: {product.category}. {product.description}</p>
+          <p>
+            {product.fabric ? `Fabric: ${product.fabric}. ` : ''}
+            {product.category ? `Category: ${product.category}. ` : ''}
+            {product.description}
+          </p>
         </Accordion>
         <Accordion title="CARE INSTRUCTIONS">
           <p>Machine wash cold with like colors. Do not bleach. Tumble dry low. Warm iron if needed.</p>

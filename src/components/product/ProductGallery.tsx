@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import Image from 'next/image'
-import { ZoomIn } from 'lucide-react'
+import { ZoomIn, ImageOff } from 'lucide-react'
 
 /**
  * Product media gallery: a large active image with a zoom toggle (click to switch
@@ -11,6 +11,15 @@ import { ZoomIn } from 'lucide-react'
 export default function ProductGallery({ images, title }: { images: string[]; title: string }) {
   const [active, setActive] = useState(0)
   const [zoomed, setZoomed] = useState(false)
+
+  // No media yet — show a neutral placeholder instead of crashing next/image.
+  if (images.length === 0) {
+    return (
+      <div className="relative aspect-square w-full grid place-items-center bg-cream text-gray-300">
+        <ImageOff size={40} strokeWidth={1.5} />
+      </div>
+    )
+  }
 
   return (
     <div>

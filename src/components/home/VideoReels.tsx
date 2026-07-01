@@ -1,18 +1,18 @@
 'use client'
 
-import { useRef, useState, useCallback } from 'react'
+import { useRef, useState, useCallback, useEffect } from 'react'
 import { ChevronLeft, ChevronRight, Volume2, VolumeX } from 'lucide-react'
 
 /**
  * "#INDULGENCE, THE ARAISH WAY" — vertical 9:16 video reels carousel.
  *
- * Scroll tracking: the active dot is derived directly from the track's scrollLeft
- * (instant, no observer lag). Arrows and dots scroll the track to index * step,
- * where step is the exact card pitch (card width + gap) measured from the DOM.
+ * PERFORMANCE: the reels total ~110MB. We never load them all up front. An
+ * IntersectionObserver mounts a card's <video> only when it scrolls near the
+ * viewport, and pauses videos that leave view. So an anonymous visitor who never
+ * scrolls to this section downloads zero video bytes.
  *
- * Per-card mute toggle: each card tracks its own muted state. On mount all
- * videos start muted (browser autoplay policy requires this). Clicking the
- * speaker icon unmutes that card only and re-mutes any previously unmuted one.
+ * Scroll tracking: the active dot is derived from the track's scrollLeft (instant).
+ * Per-card mute: each card tracks its own muted state; unmuting one re-mutes others.
  */
 
 const REELS = [
@@ -32,10 +32,35 @@ export default function VideoReels() {
   const videoRefs = useRef<(HTMLVideoElement | null)[]>([])
 
   const [activeIndex, setActiveIndex] = useState(0)
-  // index of the currently unmuted video (-1 = all muted)
   const [unmutedIndex, setUnmutedIndex] = useState(-1)
+  // Which cards have scrolled near the viewport — only these mount a <video>.
+  const [loaded, setLoaded] = useState<boolean[]>(() => REELS.map(() => false))
 
-  // Exact card pitch in px (card width + gap), measured from the first two cards.
+  // Lazy-mount + play/pause based on viewport visibility.
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          const i = Number((entry.target as HTMLElement).dataset.index)
+          if (entry.isIntersecting) {
+            setLoaded((prev) => {
+              if (prev[i]) return prev
+              const next = [...prev]
+              next[i] = true
+              return next
+            })
+            videoRefs.current[i]?.play().catch(() => {})
+          } else {
+            videoRefs.current[i]?.pause()
+          }
+        })
+      },
+      { root: null, rootMargin: '300px', threshold: 0.1 }
+    )
+    cardRefs.current.forEach((c) => c && observer.observe(c))
+    return () => observer.disconnect()
+  }, [])
+
   const stepSize = () => {
     const a = cardRefs.current[0]
     const b = cardRefs.current[1]
@@ -43,7 +68,6 @@ export default function VideoReels() {
     return a ? a.offsetWidth : 0
   }
 
-  // Scroll the track so card `index` sits at the left edge.
   const scrollToCard = useCallback((index: number) => {
     const el = trackRef.current
     if (!el) return
@@ -53,7 +77,6 @@ export default function VideoReels() {
 
   const scrollByOne = (dir: 1 | -1) => scrollToCard(activeIndex + dir)
 
-  // Derive the active dot from scroll position — instant, no observer lag.
   const onTrackScroll = () => {
     const el = trackRef.current
     const step = stepSize()
@@ -63,13 +86,10 @@ export default function VideoReels() {
 
   const toggleMute = (index: number) => {
     const clickedMuted = unmutedIndex === index
-    // mute everything
     videoRefs.current.forEach((v) => { if (v) v.muted = true })
     if (clickedMuted) {
-      // was already unmuted → mute it (toggle off)
       setUnmutedIndex(-1)
     } else {
-      // unmute this one
       const v = videoRefs.current[index]
       if (v) v.muted = false
       setUnmutedIndex(index)
@@ -110,18 +130,22 @@ export default function VideoReels() {
         {REELS.map((src, i) => (
           <div
             key={src}
+            data-index={i}
             ref={(el) => { cardRefs.current[i] = el }}
             className="relative shrink-0 snap-start w-[220px] sm:w-[240px] md:w-[270px] aspect-[9/16] rounded-2xl overflow-hidden bg-gray-900"
           >
-            <video
-              ref={(el) => { videoRefs.current[i] = el }}
-              src={src}
-              autoPlay
-              loop
-              muted
-              playsInline
-              className="w-full h-full object-cover rounded-2xl"
-            />
+            {loaded[i] && (
+              <video
+                ref={(el) => { videoRefs.current[i] = el }}
+                src={src}
+                autoPlay
+                loop
+                muted
+                playsInline
+                preload="auto"
+                className="w-full h-full object-cover rounded-2xl"
+              />
+            )}
 
             {/* Mute / unmute button */}
             <button
@@ -147,8 +171,8 @@ export default function VideoReels() {
             aria-label={`Go to reel ${i + 1}`}
             className={`rounded-full transition-all duration-300 ${
               i === activeIndex
-                ? 'w-8 h-[6px] bg-brand'          // active → gold pill
-                : 'w-[6px] h-[6px] bg-gray-300 hover:bg-gray-400' // inactive → grey dot
+                ? 'w-8 h-[6px] bg-brand'
+                : 'w-[6px] h-[6px] bg-gray-300 hover:bg-gray-400'
             }`}
           />
         ))}

@@ -2,8 +2,7 @@
 
 import { useState, useMemo } from 'react'
 import { SlidersHorizontal } from 'lucide-react'
-import { type Product } from '../../lib/products'
-import ProductCard from './ProductCard'
+import ProductCard, { type ShopCard } from './ProductCard'
 import FilterDrawer from './FilterDrawer'
 
 type Sort = 'new' | 'price-asc' | 'price-desc'
@@ -14,7 +13,7 @@ const SORT_LABELS: Record<Sort, string> = {
   'price-desc': 'Price, high to low'
 }
 
-export default function ShopExperience({ products }: { products: Product[] }) {
+export default function ShopExperience({ products }: { products: ShopCard[] }) {
   const [drawerOpen, setDrawerOpen] = useState(false)
   const [sort, setSort] = useState<Sort>('new')
 

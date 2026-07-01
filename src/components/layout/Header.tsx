@@ -2,8 +2,9 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { Menu, Search, User, ShoppingBag } from 'lucide-react'
+import { Menu, Search, ShoppingBag } from 'lucide-react'
 import NavMenu from './NavMenu'
+import AccountMenu from './AccountMenu'
 
 /**
  * Global site header.
@@ -78,9 +79,7 @@ export default function Header() {
             <Link href="/shop" aria-label="Search" className="hover:text-brand transition-colors">
               <Search size={20} strokeWidth={1.5} />
             </Link>
-            <button aria-label="Account" className="hover:text-brand transition-colors">
-              <User size={20} strokeWidth={1.5} />
-            </button>
+            <AccountMenu />
             <Link href="/shop" aria-label="Shopping bag" className="hover:text-brand transition-colors">
               <ShoppingBag size={20} strokeWidth={1.5} />
             </Link>

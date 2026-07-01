@@ -1,21 +1,50 @@
+import { cache } from 'react'
 import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'
 import ProductGallery from '../../../components/product/ProductGallery'
 import BuyBox from '../../../components/product/BuyBox'
-import { PRODUCTS, getProduct, formatPrice } from '../../../lib/products'
+import { type Product, formatPrice } from '../../../lib/products'
+import { prisma } from '@/server/prisma'
+
+export const dynamic = 'force-dynamic'
 
 type Params = { params: { slug: string } }
 
-export function generateStaticParams() {
-  return PRODUCTS.map((p) => ({ slug: p.slug }))
+// cache() dedupes the query within a single request, so generateMetadata() and
+// the page component share ONE DB round-trip instead of two.
+const loadProduct = cache(async (slug: string) => {
+  return prisma.product.findUnique({
+    where: { slug },
+    include: { category: true }
+  })
+})
+
+/** Map a DB product into the shape ProductGallery + BuyBox expect. */
+function toViewModel(p: NonNullable<Awaited<ReturnType<typeof loadProduct>>>): Product {
+  return {
+    slug: p.slug,
+    title: p.title,
+    priceFrom: p.priceFrom,
+    image: p.mediaUrls[0] ?? '',
+    gallery: p.mediaUrls,
+    category: p.category?.name ?? '',
+    fabric: '',
+    color: '',
+    description: p.description ?? '',
+    // Variants aren't modelled per-product yet — selectors stay hidden until they are.
+    sizes: [],
+    fabrics: [],
+    colors: [],
+    addOns: []
+  }
 }
 
-export function generateMetadata({ params }: Params): Metadata {
-  const product = getProduct(params.slug)
-  if (!product) return { title: 'Product not found — Muneeb Ki Araish' }
+export async function generateMetadata({ params }: Params): Promise<Metadata> {
+  const p = await loadProduct(params.slug)
+  if (!p) return { title: 'Product not found — Muneeb Ki Araish' }
 
-  const title = `${product.title} — Muneeb Ki Araish`
-  const description = `${product.description} From ${formatPrice(product.priceFrom)}.`
+  const title = `${p.title} — Muneeb Ki Araish`
+  const description = `${p.description ?? ''} From ${formatPrice(p.priceFrom)}.`.trim()
   return {
     title,
     description,
@@ -23,14 +52,16 @@ export function generateMetadata({ params }: Params): Metadata {
       title,
       description,
       type: 'website',
-      images: [{ url: product.image }]
+      images: p.mediaUrls[0] ? [{ url: p.mediaUrls[0] }] : []
     }
   }
 }
 
-export default function ProductPage({ params }: Params) {
-  const product = getProduct(params.slug)
-  if (!product) notFound()
+export default async function ProductPage({ params }: Params) {
+  const p = await loadProduct(params.slug)
+  if (!p) notFound()
+
+  const product = toViewModel(p)
 
   return (
     <div className="max-w-7xl mx-auto px-4 md:px-8 py-10">
