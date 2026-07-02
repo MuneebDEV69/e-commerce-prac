@@ -1,0 +1,18 @@
+# Keep the build context small & fast — these are never needed inside images.
+**/node_modules
+**/.next
+**/dist
+**/build
+**/.turbo
+.git
+.gitignore
+**/.env
+**/.env.*
+!**/.env.example
+**/*.log
+npm-debug.log*
+**/.DS_Store
+**/.vscode
+docs
+scripts/*.md
+**/*.tsbuildinfo

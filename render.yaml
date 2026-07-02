@@ -1,0 +1,30 @@
+# Render Blueprint for the A-Backend Express API.
+# Deploy: Render Dashboard → New → Blueprint → pick this repo.
+#
+# rootDir is the repo ROOT (not A-Backend) so npm workspaces can resolve the
+# @ecom/shared package. The build installs deps + generates the Prisma client;
+# the server runs via tsx (transpiles TS + the shared workspace at runtime).
+services:
+  - type: web
+    name: araish-backend
+    runtime: node
+    plan: free
+    rootDir: .
+    buildCommand: npm install && npm run db:generate
+    startCommand: npm run start:backend
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_VERSION
+        value: "20"
+      - key: DATABASE_URL
+        sync: false
+      - key: DIRECT_URL
+        sync: false
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_ANON_KEY
+        sync: false
+      - key: FRONTEND_URL
+        sync: false
+      - key: ADMIN_URL
+        sync: false

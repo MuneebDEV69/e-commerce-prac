@@ -1,0 +1,65 @@
+# Full-stack local cluster. Build context is the repo root for every service so
+# the npm workspace + packages/shared resolve. Run: `docker compose up --build`.
+#
+# Values come from the root `.env` file (auto-loaded by docker compose).
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: A-Backend/Dockerfile
+    ports:
+      - '4000:4000'
+    environment:
+      DATABASE_URL: ${DATABASE_URL}
+      DIRECT_URL: ${DIRECT_URL}
+      SUPABASE_URL: ${SUPABASE_URL}
+      SUPABASE_ANON_KEY: ${SUPABASE_ANON_KEY}
+      # Allowed browser origins (for when CORS is tightened for production).
+      FRONTEND_URL: http://localhost:3000
+      ADMIN_URL: http://localhost:3001
+      PORT: 4000
+    networks:
+      - ecom
+
+  frontend:
+    build:
+      context: .
+      dockerfile: A-Frontend/Dockerfile
+      args:
+        # NEXT_PUBLIC_* are baked at build time → passed as build args.
+        NEXT_PUBLIC_SUPABASE_URL: ${NEXT_PUBLIC_SUPABASE_URL}
+        NEXT_PUBLIC_SUPABASE_ANON_KEY: ${NEXT_PUBLIC_SUPABASE_ANON_KEY}
+    ports:
+      - '3000:3000'
+    environment:
+      # Server-side calls reach the backend by its service name inside the network.
+      API_URL: http://backend:4000
+      NEXT_PUBLIC_SUPABASE_URL: ${NEXT_PUBLIC_SUPABASE_URL}
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ${NEXT_PUBLIC_SUPABASE_ANON_KEY}
+    depends_on:
+      - backend
+    networks:
+      - ecom
+
+  admin:
+    build:
+      context: .
+      dockerfile: Admin-panel/Dockerfile
+      args:
+        NEXT_PUBLIC_SUPABASE_URL: ${NEXT_PUBLIC_SUPABASE_URL}
+        NEXT_PUBLIC_SUPABASE_ANON_KEY: ${NEXT_PUBLIC_SUPABASE_ANON_KEY}
+    ports:
+      - '3001:3001'
+    environment:
+      API_URL: http://backend:4000
+      NEXT_PUBLIC_SUPABASE_URL: ${NEXT_PUBLIC_SUPABASE_URL}
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ${NEXT_PUBLIC_SUPABASE_ANON_KEY}
+    depends_on:
+      - backend
+    networks:
+      - ecom
+
+networks:
+  ecom:
+    driver: bridge
