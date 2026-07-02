@@ -6,7 +6,8 @@ import BuyBox from '../../../components/product/BuyBox'
 import { type Product, formatPrice } from '../../../lib/products'
 import { fetchProduct } from '@/lib/api'
 
-export const dynamic = 'force-dynamic'
+// ISR: cache each product page, revalidate in the background.
+export const revalidate = 120
 
 type Params = { params: { slug: string } }
 

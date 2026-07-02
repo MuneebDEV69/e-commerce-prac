@@ -2,7 +2,8 @@ import SubCategorySlider from '../../components/shop/SubCategorySlider'
 import ShopExperience from '../../components/shop/ShopExperience'
 import { fetchProducts } from '@/lib/api'
 
-export const dynamic = 'force-dynamic'
+// ISR: serve cached HTML instantly, revalidate in the background.
+export const revalidate = 120
 
 export const metadata = {
   title: 'Shop — Muneeb Ki Araish',

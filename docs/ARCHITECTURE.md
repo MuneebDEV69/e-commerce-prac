@@ -22,9 +22,18 @@ Three servers, one database. `npm run dev` starts all three together via `concur
 Public-facing shop only — no admin code ships to customers, so the bundle stays
 light. Next.js App Router, Tailwind, Supabase Auth (SSR) for login/signup.
 
+**Browsing is public** (landing, `/shop`, `/product/*`) — standard e-commerce,
+and it lets an admin preview the store without a second login. Only
+customer-specific areas (`/checkout`, `/account`) require a session (see
+`src/utils/supabase/middleware.ts`).
+
+**Product pages use ISR** (`export const revalidate = 120`) so they're served
+from cache instantly and revalidated in the background — the user is never
+blocked on a cold backend. `src/lib/api.ts` fetches degrade gracefully (empty
+list / not-found) if the backend is briefly unreachable, so builds never crash.
+
 **It has no database connection.** Every product read goes through the
-A-Backend REST API (`src/lib/api.ts`). This keeps the storefront fast and
-decoupled from the DB.
+A-Backend REST API (`src/lib/api.ts`).
 
 Run: `npm run dev:frontend` · Build: `npm run build:frontend`
 

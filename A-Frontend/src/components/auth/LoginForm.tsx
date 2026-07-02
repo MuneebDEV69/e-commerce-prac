@@ -2,7 +2,6 @@
 
 import { useState, type FormEvent } from 'react'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
 import { Eye, EyeOff } from 'lucide-react'
 import { createClient } from '@/utils/supabase/client'
 import { friendlyAuthError } from '@/utils/auth-errors'
@@ -16,7 +15,6 @@ export default function LoginForm({
   justRegistered?: boolean
   showLoginNotice?: boolean
 }) {
-  const router = useRouter()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [showPw, setShowPw] = useState(false)
@@ -37,8 +35,10 @@ export default function LoginForm({
       return
     }
 
-    router.push(redirectTo)
-    router.refresh() // re-render server components so the header shows the user
+    // Hard navigation (not router.push): forces a full page load so the server
+    // reliably reads the freshly-set auth cookie. A soft push can race the cookie
+    // write and bounce back to /login (the "stuck on Signing in" bug).
+    window.location.assign(redirectTo)
   }
 
   return (

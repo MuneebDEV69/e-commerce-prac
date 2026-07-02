@@ -102,6 +102,35 @@ Env vars:
 
 ---
 
+## 3.5. Keep the backend warm (fixes slow first loads)
+
+Render's **free tier spins the server down after ~15 min idle**; the next
+request then takes 30–60s to cold-start — the #1 cause of "the site is slow the
+first time." Two ways to keep it awake:
+
+- **Committed GitHub Action** (`.github/workflows/keep-backend-warm.yml`): add a
+  repo **variable** `BACKEND_URL = https://<service>.onrender.com` (Settings →
+  Secrets and variables → Actions → Variables). It pings `/health` every ~10 min.
+- **More reliable (recommended):** a free external pinger —
+  [UptimeRobot](https://uptimerobot.com) or [cron-job.org](https://cron-job.org)
+  — hitting `<BACKEND_URL>/health` every 5 minutes. (GitHub's scheduler lags and
+  pauses after repo inactivity.)
+
+Or upgrade the Render service to a paid always-on plan to remove cold starts entirely.
+
+### Session & auth notes
+- **Storefront browsing is public** (`/shop`, `/product`); only `/checkout` and
+  `/account` require login. So an admin clicking "View Storefront" is **not**
+  asked to log in again — they browse as a guest.
+- **Admin and storefront do NOT share a login session** — they're separate
+  origins/domains (and use different auth cookie names). This is expected. If you
+  later want a single sign-on across both, put them on subdomains of one custom
+  domain (e.g. `araish.com` + `admin.araish.com`) and set the Supabase auth
+  cookie's domain to `.araish.com`. This is **not possible** on `*.vercel.app`
+  (the Public Suffix List blocks shared cookies), so it requires a custom domain.
+
+---
+
 ## 4. Push to GitHub
 ```bash
 git add .

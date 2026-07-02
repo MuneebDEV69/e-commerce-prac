@@ -1,13 +1,11 @@
 'use client'
 
 import { useState, type FormEvent } from 'react'
-import { useRouter } from 'next/navigation'
 import { Eye, EyeOff } from 'lucide-react'
 import { createClient } from '@/utils/supabase/client'
 import { friendlyAuthError } from '@/utils/auth-errors'
 
 export default function LoginForm({ redirectTo = '/' }: { redirectTo?: string }) {
-  const router = useRouter()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [showPw, setShowPw] = useState(false)
@@ -27,8 +25,9 @@ export default function LoginForm({ redirectTo = '/' }: { redirectTo?: string })
       return
     }
 
-    router.push(redirectTo)
-    router.refresh()
+    // Hard navigation so the server picks up the freshly-set auth cookie
+    // immediately (avoids the "stuck on Signing in" soft-navigation race).
+    window.location.assign(redirectTo)
   }
 
   return (

@@ -2,22 +2,24 @@ import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
 /**
- * Viewable WITHOUT logging in: the landing page and the auth pages only.
- * Everything else (shop, product, checkout, account, admin, …) requires a session.
+ * The storefront is a public shop: anyone can browse the landing page, /shop and
+ * /product without an account (standard e-commerce, and it lets an admin preview
+ * the store without a second login). Only customer-specific areas require auth.
  */
-function isPublicPath(path: string): boolean {
-  if (path === '/') return true
-  return path.startsWith('/login') || path.startsWith('/signup')
+const PROTECTED_PREFIXES = ['/checkout', '/account']
+
+function needsAuth(path: string): boolean {
+  return PROTECTED_PREFIXES.some((p) => path.startsWith(p))
 }
 
 /**
- * Refreshes the Supabase auth session and enforces "login required" on every
- * non-public page. Logged-out users are redirected to /login?redirect=<path>;
- * API routes get a 401 instead of an HTML redirect.
+ * Refreshes the Supabase session (so logged-in users stay logged in) and gates
+ * only the protected areas. Public pages skip the Supabase round-trip when there
+ * is no session cookie, keeping browsing snappy.
  */
 export async function updateSession(request: NextRequest) {
   const path = request.nextUrl.pathname
-  const isPublic = isPublicPath(path)
+  const protectedRoute = needsAuth(path)
   const isApi = path.startsWith('/api')
   const hasAuthCookie = request.cookies.getAll().some((c) => c.name.startsWith('sb-'))
 
@@ -28,14 +30,17 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(url)
   }
 
-  // Fast paths needing no Supabase round-trip (keeps browsing snappy):
-  if (!hasAuthCookie) {
-    if (isPublic) return NextResponse.next({ request })
+  // Anonymous visitor on a public page → no Supabase round-trip at all.
+  if (!hasAuthCookie && !protectedRoute) {
+    return NextResponse.next({ request })
+  }
+  // Anonymous visitor on a protected page → straight to login (no round-trip).
+  if (!hasAuthCookie && protectedRoute) {
     if (isApi) return new NextResponse('Unauthorized', { status: 401 })
     return redirectToLogin()
   }
 
-  // A session cookie exists → refresh it and verify the user is real.
+  // A session cookie exists → refresh it (keeps the header in sync) and verify.
   let supabaseResponse = NextResponse.next({ request })
 
   const supabase = createServerClient(
@@ -57,13 +62,11 @@ export async function updateSession(request: NextRequest) {
     }
   )
 
-  // IMPORTANT: getUser() revalidates the token with Supabase — do not remove.
   const {
     data: { user }
   } = await supabase.auth.getUser()
 
-  // Cookie present but token invalid/expired, on a protected page → login.
-  if (!user && !isPublic) {
+  if (!user && protectedRoute) {
     if (isApi) return new NextResponse('Unauthorized', { status: 401 })
     return redirectToLogin()
   }
