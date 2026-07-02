@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { fetchCategories } from '@/lib/api'
-import ProductFormLoader from '@/components/admin/ProductFormLoader'
+import ProductForm from '@/components/admin/ProductForm'
 
 export const dynamic = 'force-dynamic'
 export const metadata = { title: 'New Product — Admin' }
@@ -14,7 +14,7 @@ export default async function NewProductPage() {
         ← Back to Dashboard
       </Link>
       <h1 className="font-serif text-3xl tracking-[0.15em] text-brand mt-3 mb-8">Add New Product</h1>
-      <ProductFormLoader categories={categories} />
+      <ProductForm categories={categories} />
     </div>
   )
 }

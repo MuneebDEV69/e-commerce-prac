@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { fetchProductById, fetchCategories } from '@/lib/api'
-import ProductFormLoader from '@/components/admin/ProductFormLoader'
+import ProductForm from '@/components/admin/ProductForm'
 
 export const dynamic = 'force-dynamic'
 export const metadata = { title: 'Edit Product — Admin' }
@@ -20,7 +20,7 @@ export default async function EditProductPage({ params }: { params: { id: string
         ← Back to Products
       </Link>
       <h1 className="font-serif text-3xl tracking-[0.15em] text-brand mt-3 mb-8">Edit Product</h1>
-      <ProductFormLoader
+      <ProductForm
         categories={categories}
         product={{
           id: product.id,
