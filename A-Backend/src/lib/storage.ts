@@ -3,11 +3,6 @@ import { createClient } from '@supabase/supabase-js'
 const BUCKET = 'araish-media'
 const MARKER = `/storage/v1/object/public/${BUCKET}/`
 
-/**
- * Delete bucket files by their public URLs, acting as the admin who made the
- * request (their token is passed through) so the storage RLS "admins only"
- * delete policy is satisfied. Non-bucket URLs (local seed paths) are ignored.
- */
 export async function deleteMediaByUrls(urls: string[], accessToken: string): Promise<void> {
   const paths = urls
     .map((u) => {

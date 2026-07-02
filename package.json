@@ -2,6 +2,9 @@
   "name": "ecom-monorepo",
   "version": "1.0.0",
   "private": true,
+  "engines": {
+    "node": ">=22.0.0"
+  },
   "workspaces": [
     "A-Frontend",
     "A-Backend",

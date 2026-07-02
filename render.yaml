@@ -4,6 +4,11 @@
 # rootDir is the repo ROOT (not A-Backend) so npm workspaces can resolve the
 # @ecom/shared package. The build installs deps + generates the Prisma client;
 # the server runs via tsx (transpiles TS + the shared workspace at runtime).
+#
+# NODE_VERSION must stay >= 22: @supabase/supabase-js constructs a Realtime
+# client inside every createClient() call (even though we never use realtime),
+# and that constructor throws on Node < 22 without native WebSocket support.
+# Do not lower this — it will crash the server on boot (see docs/DEPLOYMENT.md).
 services:
   - type: web
     name: araish-backend
@@ -15,7 +20,7 @@ services:
     healthCheckPath: /health
     envVars:
       - key: NODE_VERSION
-        value: "20"
+        value: "22"
       - key: DATABASE_URL
         sync: false
       - key: DIRECT_URL

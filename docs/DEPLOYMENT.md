@@ -7,6 +7,15 @@ Three deployables from one monorepo:
 
 Deploy the **backend first** (you need its live URL for the frontends).
 
+> **⚠️ Node version — all three services need Node ≥ 22.** `@supabase/supabase-js`
+> constructs a Realtime client inside every `createClient()` call, even though
+> we only use it for auth — and that constructor **throws on Node < 22** if no
+> native WebSocket is available ("Node.js detected but native WebSocket not
+> found"). This crashes the process on boot, not just a warning. `engines.node`
+> is set to `>=22.0.0` in every `package.json` as a guard, but you must **also**
+> set the platform-level Node version explicitly (below) — `engines` alone does
+> not force it on Render or Vercel.
+
 > **Testing the full stack locally before deploying?** Run
 > `docker compose up --build` from the repo root instead — it builds all three
 > services in containers on one network. See the Dockerfiles in each app folder
@@ -32,7 +41,7 @@ Render Dashboard → **New → Blueprint** → select this repo → it reads `re
 **Environment variables** (Render → Environment):
 | Key | Value |
 |-----|-------|
-| `NODE_VERSION` | `20` |
+| `NODE_VERSION` | `22` (already set in `render.yaml` — do not lower, see the Node-version warning above) |
 | `DATABASE_URL` | Supabase **pooler** URL (port 6543, `?pgbouncer=true&connection_limit=1`) |
 | `DIRECT_URL` | Supabase **direct** URL (port 5432) |
 | `SUPABASE_URL` | `https://PROJECT.supabase.co` |
@@ -57,6 +66,7 @@ Create **two** Vercel projects from this repo. Vercel auto-detects the npm-works
 | Framework Preset | Next.js |
 | Build Command | *(default)* `next build` |
 | Install Command | *(default)* `npm install` |
+| **Node.js Version** (Project Settings → General) | **22.x** — see the Node-version warning above; `engines.node` in `package.json` does not set this on Vercel, the dropdown must be changed manually |
 
 Env vars:
 | Key | Value |
@@ -71,6 +81,7 @@ Env vars:
 | Root Directory | `Admin-panel` |
 | Framework Preset | Next.js |
 | Build / Install | defaults |
+| **Node.js Version** (Project Settings → General) | **22.x** (same reason as above) |
 
 Env vars:
 | Key | Value |
@@ -103,9 +114,9 @@ git push origin main
 
 ## Order of operations (checklist)
 - [ ] Push repo to GitHub
-- [ ] Render: deploy backend, set DB/Supabase env → get backend URL, test `/health`
-- [ ] Vercel: deploy A-Frontend (Root `A-Frontend`) with `API_URL` = backend URL
-- [ ] Vercel: deploy Admin-panel (Root `Admin-panel`) with `API_URL` + `NEXT_PUBLIC_STOREFRONT_URL`
+- [ ] Render: deploy backend (Node version 22 via `render.yaml`, already set) → get backend URL, test `/health`
+- [ ] Vercel: deploy A-Frontend (Root `A-Frontend`), **set Node.js Version = 22.x in Project Settings**, `API_URL` = backend URL
+- [ ] Vercel: deploy Admin-panel (Root `Admin-panel`), **set Node.js Version = 22.x in Project Settings**, `API_URL` + `NEXT_PUBLIC_STOREFRONT_URL`
 - [ ] Render: set `FRONTEND_URL` + `ADMIN_URL` → redeploy
 - [ ] Supabase: add both URLs to Auth redirect/site URLs
 - [ ] Smoke test: storefront loads, admin login → dashboard, create a product → shows on store

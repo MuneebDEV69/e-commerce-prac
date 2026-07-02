@@ -2,7 +2,7 @@
 # Build context = REPO ROOT (see docker-compose). Paths below are repo-relative.
 
 # ---------- deps ----------
-FROM node:20-slim AS deps
+FROM node:22-slim AS deps
 WORKDIR /app
 COPY package.json package-lock.json ./
 COPY A-Frontend/package.json ./A-Frontend/
@@ -12,7 +12,7 @@ COPY packages/shared/package.json ./packages/shared/
 RUN npm ci
 
 # ---------- builder ----------
-FROM node:20-slim AS builder
+FROM node:22-slim AS builder
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
@@ -24,7 +24,7 @@ ENV NEXT_TELEMETRY_DISABLED=1
 RUN npm run build:admin
 
 # ---------- runner (listens on 3001) ----------
-FROM node:20-slim AS runner
+FROM node:22-slim AS runner
 WORKDIR /app
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1

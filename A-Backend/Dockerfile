@@ -3,7 +3,7 @@
 # because the API imports the @ecom/shared TS package at runtime.
 
 # ---------- deps ----------
-FROM node:20-slim AS deps
+FROM node:22-slim AS deps
 WORKDIR /app
 # openssl is required by the Prisma query engine on debian.
 RUN apt-get update -y && apt-get install -y openssl && rm -rf /var/lib/apt/lists/*
@@ -15,7 +15,7 @@ COPY packages/shared/package.json ./packages/shared/
 RUN npm ci
 
 # ---------- runner ----------
-FROM node:20-slim AS runner
+FROM node:22-slim AS runner
 WORKDIR /app
 RUN apt-get update -y && apt-get install -y openssl && rm -rf /var/lib/apt/lists/*
 ENV NODE_ENV=production
