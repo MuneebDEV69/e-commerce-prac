@@ -60,8 +60,8 @@ export default function Header() {
               <span
                 className={`block font-serif font-semibold uppercase bg-gradient-to-r from-[#b8860b] via-brand to-[#dcb878] bg-clip-text text-transparent drop-shadow-sm transition-all duration-300 ${
                   scrolled
-                    ? 'text-xl sm:text-2xl tracking-[0.25em]'
-                    : 'text-2xl sm:text-4xl tracking-[0.3em]'
+                    ? 'text-sm tracking-[0.12em] sm:text-xl sm:tracking-[0.25em]'
+                    : 'text-base tracking-[0.14em] sm:text-2xl sm:tracking-[0.25em] md:text-4xl md:tracking-[0.3em]'
                 }`}
               >
                 Muneeb&nbsp;Ki&nbsp;Araish
@@ -74,13 +74,13 @@ export default function Header() {
             </Link>
           </div>
 
-          {/* Right — utilities */}
-          <div className="flex items-center justify-end gap-4 sm:gap-6 text-gray-800">
-            <Link href="/shop" aria-label="Search" className="hover:text-brand transition-colors">
+          {/* Right — utilities (p-2 gives ~44px touch targets) */}
+          <div className="flex items-center justify-end gap-1 sm:gap-3 text-gray-800">
+            <Link href="/shop" aria-label="Search" className="p-2 hover:text-brand transition-colors">
               <Search size={20} strokeWidth={1.5} />
             </Link>
             <AccountMenu />
-            <Link href="/shop" aria-label="Shopping bag" className="hover:text-brand transition-colors">
+            <Link href="/shop" aria-label="Shopping bag" className="p-2 hover:text-brand transition-colors">
               <ShoppingBag size={20} strokeWidth={1.5} />
             </Link>
           </div>

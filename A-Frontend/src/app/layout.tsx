@@ -13,7 +13,7 @@ export const metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
-      <body className="antialiased font-sans bg-white text-black">
+      <body className="antialiased font-sans bg-white text-black overflow-x-clip">
         <Header />
         <Marquee />
 

@@ -59,7 +59,7 @@ export default function AccountMenu() {
   // Logged out
   if (!name) {
     return (
-      <Link href="/login" aria-label="Account" className="hover:text-brand transition-colors">
+      <Link href="/login" aria-label="Account" className="p-2 hover:text-brand transition-colors">
         <User size={20} strokeWidth={1.5} />
       </Link>
     )
