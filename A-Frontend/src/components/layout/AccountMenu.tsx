@@ -30,21 +30,30 @@ export default function AccountMenu() {
   }
 
   useEffect(() => {
-    const supabase = createClient()
+    // Guard: if Supabase env vars are missing (e.g. not set in Vercel), don't let
+    // this crash hydration and kill every button — just stay in the logged-out
+    // state (the login link is a plain <Link> and keeps working).
+    let unsubscribe: (() => void) | undefined
+    try {
+      const supabase = createClient()
 
-    const apply = (user: { email?: string; user_metadata?: { name?: string } } | null) => {
-      if (user) {
-        setEmail(user.email ?? null)
-        setName(user.user_metadata?.name?.trim() || user.email?.split('@')[0] || 'Account')
-      } else {
-        setEmail(null)
-        setName(null)
+      const apply = (user: { email?: string; user_metadata?: { name?: string } } | null) => {
+        if (user) {
+          setEmail(user.email ?? null)
+          setName(user.user_metadata?.name?.trim() || user.email?.split('@')[0] || 'Account')
+        } else {
+          setEmail(null)
+          setName(null)
+        }
       }
-    }
 
-    supabase.auth.getUser().then(({ data }) => apply(data.user))
-    const { data: sub } = supabase.auth.onAuthStateChange((_e, session) => apply(session?.user ?? null))
-    return () => sub.subscription.unsubscribe()
+      supabase.auth.getUser().then(({ data }) => apply(data.user)).catch(() => {})
+      const { data: sub } = supabase.auth.onAuthStateChange((_e, session) => apply(session?.user ?? null))
+      unsubscribe = () => sub.subscription.unsubscribe()
+    } catch (e) {
+      console.error('[AccountMenu] Supabase init failed — check NEXT_PUBLIC_SUPABASE_* env vars:', e)
+    }
+    return () => unsubscribe?.()
   }, [])
 
   // Close dropdown on outside click
