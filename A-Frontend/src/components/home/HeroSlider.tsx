@@ -54,7 +54,9 @@ export default function HeroSlider() {
               fill
               priority={i === 0}
               sizes="100vw"
-              className="object-cover"
+              // Mobile: show the WHOLE image (no cropping) on the cream backdrop.
+              // Larger screens: full-bleed cover.
+              className="object-contain sm:object-cover"
             />
           </div>
         ))}
