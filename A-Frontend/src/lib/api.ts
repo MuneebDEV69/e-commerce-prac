@@ -19,6 +19,8 @@ export type ApiProduct = {
   title: string
   slug: string
   description: string | null
+  material: string | null
+  care: string | null
   priceFrom: number
   stock: number
   published: boolean
@@ -36,6 +38,21 @@ export async function fetchProducts(): Promise<ApiProduct[]> {
   } catch (e) {
     // Don't crash the page/build if the backend is briefly unreachable.
     console.error('[api] fetchProducts failed:', e)
+    return []
+  }
+}
+
+export type LandingBlock = { id: string; type: string; content: Record<string, unknown> }
+
+export async function fetchLandingSections(): Promise<LandingBlock[]> {
+  try {
+    const res = await fetch(`${API_URL}/v1/landing`, { next: { revalidate: 60 } })
+    if (!res.ok) throw new Error(`Landing request failed: ${res.status}`)
+    const data = await res.json()
+    return Array.isArray(data?.sections) ? data.sections : []
+  } catch (e) {
+    // Degrade gracefully if the backend is briefly unreachable.
+    console.error('[api] fetchLandingSections failed:', e)
     return []
   }
 }

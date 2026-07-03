@@ -1,6 +1,7 @@
 export default function NewProductLoading() {
   return (
     <div className="max-w-4xl mx-auto px-4 py-12 animate-pulse">
+      <p className="text-sm tracking-wider text-gray-400 mb-6">Add product page is loading…</p>
       <div className="h-3 w-28 bg-gray-200 rounded" />
       <div className="h-8 w-56 bg-gray-200 rounded mt-3 mb-8" />
       <div className="space-y-6 max-w-2xl">

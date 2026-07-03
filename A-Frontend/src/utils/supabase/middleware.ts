@@ -3,8 +3,9 @@ import { NextResponse, type NextRequest } from 'next/server'
 
 /**
  * The storefront is a public shop: anyone can browse the landing page, /shop and
- * /product without an account (standard e-commerce, and it lets an admin preview
- * the store without a second login). Only customer-specific areas require auth.
+ * /product without an account. But placing an order requires an account, so
+ * /checkout and /account are gated — an anonymous visitor is sent to /login first.
+ * Admin functionality lives entirely in the separate Admin-panel app.
  */
 const PROTECTED_PREFIXES = ['/checkout', '/account']
 

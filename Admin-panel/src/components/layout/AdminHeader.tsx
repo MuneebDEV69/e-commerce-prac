@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { LogOut } from 'lucide-react'
 import { createClient } from '@/utils/supabase/client'
+import NotificationsBell from './NotificationsBell'
 
 export default function AdminHeader({ email }: { email: string | null }) {
   const router = useRouter()
@@ -22,6 +23,7 @@ export default function AdminHeader({ email }: { email: string | null }) {
           ARAISH · ADMIN
         </Link>
         <div className="flex items-center gap-4">
+          <NotificationsBell />
           {email && <span className="hidden sm:block text-sm text-gray-500 truncate max-w-[180px]">{email}</span>}
           <button
             onClick={signOut}

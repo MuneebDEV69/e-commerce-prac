@@ -5,6 +5,7 @@
 export default function ShopLoading() {
   return (
     <div className="pb-12 animate-pulse">
+      <p className="text-center text-sm tracking-wider text-gray-400 pt-6">Shop page is loading…</p>
       {/* sub-category circles */}
       <div className="flex items-center gap-6 px-4 md:px-10 py-6">
         <div className="h-4 w-24 bg-gray-200 rounded hidden md:block" />

@@ -50,6 +50,9 @@ model Product {
   title       String
   slug        String           @unique
   description String?
+  // Structured detail fields so every product edits in ONE consistent format.
+  material    String?
+  care        String?          // care instructions (wash/dry/iron)
   priceFrom   Int
   stock       Int              @default(0)
   published   Boolean          @default(false)
@@ -85,6 +88,16 @@ model Order {
   id          String      @id @default(cuid())
   userId      String?     @map("user_id")
   user        User?       @relation(fields: [userId], references: [id])
+  // Guest-checkout contact + shipping details (COD-style, no account required).
+  customerName    String  @map("customer_name")
+  customerPhone   String  @map("customer_phone")
+  customerEmail   String? @map("customer_email")
+  shippingAddress String  @map("shipping_address")
+  city            String?
+  postalCode      String? @map("postal_code")
+  paymentMethod   String  @default("COD") @map("payment_method")
+  paymentRef      String? @map("payment_ref")
+  notes           String?
   status      OrderStatus @default(PENDING)
   totalAmount Int         @map("total_amount")
   items       OrderItem[]
@@ -109,6 +122,30 @@ model OrderItem {
   @@index([orderId])
   @@index([productId])
   @@map("order_items")
+}
+
+// Admin-editable storefront landing page (single row, id = "singleton").
+// `sections` is an ordered JSON array of blocks: { id, type, content }.
+model LandingPageContent {
+  id        String   @id @default("singleton")
+  sections  Json     @default("[]")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("landing_page_content")
+}
+
+// Short-lived 6-digit login codes emailed to users (email 2FA / OTP).
+model EmailOtp {
+  id        String   @id @default(cuid())
+  email     String
+  code      String
+  expiresAt DateTime @map("expires_at")
+  consumed  Boolean  @default(false)
+  attempts  Int      @default(0)
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([email])
+  @@map("email_otps")
 }
 
 model WebhookEvent {

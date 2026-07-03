@@ -18,6 +18,8 @@ export type Product = {
   fabric: string
   color: string
   description: string
+  material?: string
+  care?: string
   sizes: string[]
   fabrics: string[]
   colors: string[]

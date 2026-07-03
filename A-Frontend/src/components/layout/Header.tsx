@@ -2,9 +2,11 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { Menu, Search, ShoppingBag } from 'lucide-react'
+import { usePathname } from 'next/navigation'
+import { Menu, Search } from 'lucide-react'
 import NavMenu from './NavMenu'
 import AccountMenu from './AccountMenu'
+import CartButton from './CartButton'
 
 /**
  * Global site header.
@@ -18,9 +20,29 @@ import AccountMenu from './AccountMenu'
  * Layer 2 (nav) is sticky and stays. The logo shrinks on scroll-down and grows back
  * on scroll-up via the `scrolled` flag — a smooth Araish-style animation.
  */
+const DEFAULT_ANNOUNCEMENT = 'Enjoy Free Shipping on Orders Above PKR 5,000.'
+
 export default function Header() {
   const [scrolled, setScrolled] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
+  const [announcement, setAnnouncement] = useState(DEFAULT_ANNOUNCEMENT)
+  const pathname = usePathname()
+
+  // Pull the admin-managed announcement (falls back to the default text).
+  useEffect(() => {
+    fetch('/api/landing')
+      .then((r) => r.json())
+      .then((d) => {
+        const sections = Array.isArray(d?.sections) ? d.sections : []
+        const ann = sections.find((s: { type?: string }) => s.type === 'announcement')
+        const text = ann?.content?.text
+        if (typeof text === 'string' && text.trim()) setAnnouncement(text)
+      })
+      .catch(() => {})
+  }, [])
+  // Yellow "Home" button for customers on inner pages (shop, product, cart, …) —
+  // an easy way back to the landing page. Hidden on the landing page itself.
+  const showHome = pathname !== '/'
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 40)
@@ -33,7 +55,7 @@ export default function Header() {
     <>
       {/* Layer 1 — Announcement bar (scrolls away) */}
       <div className="bg-brand text-white text-center text-sm sm:text-base tracking-wide py-2.5 px-4">
-        Enjoy Free Shipping on Orders Above PKR 5,000.
+        {announcement}
       </div>
 
       {/* Layer 2 — Sticky nav */}
@@ -76,13 +98,19 @@ export default function Header() {
 
           {/* Right — utilities (p-2 gives ~44px touch targets) */}
           <div className="flex items-center justify-end gap-1 sm:gap-3 text-gray-800">
+            {showHome && (
+              <Link
+                href="/"
+                className="bg-brand text-white text-[10px] sm:text-xs tracking-[0.15em] sm:tracking-[0.2em] px-3 sm:px-5 py-2 sm:py-2.5 hover:bg-brand-dark transition-colors whitespace-nowrap"
+              >
+                HOME
+              </Link>
+            )}
             <Link href="/shop" aria-label="Search" className="hidden sm:block p-2 hover:text-brand transition-colors">
               <Search size={20} strokeWidth={1.5} />
             </Link>
             <AccountMenu />
-            <Link href="/shop" aria-label="Shopping bag" className="p-2 hover:text-brand transition-colors">
-              <ShoppingBag size={20} strokeWidth={1.5} />
-            </Link>
+            <CartButton />
           </div>
         </div>
       </nav>

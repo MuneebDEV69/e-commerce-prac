@@ -14,6 +14,8 @@ export type EditableProduct = {
   id: string
   title: string
   description: string | null
+  material: string | null
+  care: string | null
   priceFrom: number
   stock: number
   categoryId: string | null
@@ -40,6 +42,8 @@ export default function ProductForm({
 
   const [title, setTitle] = useState(product?.title ?? '')
   const [description, setDescription] = useState(product?.description ?? '')
+  const [material, setMaterial] = useState(product?.material ?? '')
+  const [care, setCare] = useState(product?.care ?? '')
   const [price, setPrice] = useState(product ? String(product.priceFrom) : '')
   const [stock, setStock] = useState(product ? String(product.stock) : '')
   const [categoryId, setCategoryId] = useState(product?.categoryId ?? categories[0]?.id ?? '')
@@ -82,6 +86,8 @@ export default function ProductForm({
     const input = {
       title: title.trim(),
       description: description.trim(),
+      material: material.trim(),
+      care: care.trim(),
       priceFrom: Math.round(priceNum),
       stock: Math.round(stockNum),
       categoryId: categoryId || null,
@@ -108,6 +114,8 @@ export default function ProductForm({
       setCreatedSlug(result.slug)
       setTitle('')
       setDescription('')
+      setMaterial('')
+      setCare('')
       setPrice('')
       setStock('')
       setCategoryId(categories[0]?.id ?? '')
@@ -155,6 +163,34 @@ export default function ProductForm({
           value={description}
           onChange={(e) => setDescription(e.target.value)}
           rows={4}
+          className="w-full border border-gray-300 px-4 py-2.5 text-sm outline-none focus:border-brand resize-y"
+        />
+      </div>
+
+      {/* Structured detail fields — same format for every product so they all edit alike. */}
+      <div>
+        <label className="block text-xs tracking-wider text-gray-600 mb-1.5">
+          MATERIAL{' '}
+          <span className="text-gray-400 normal-case tracking-normal">(e.g. 100% Cotton Sateen, 300 TC)</span>
+        </label>
+        <input
+          value={material}
+          onChange={(e) => setMaterial(e.target.value)}
+          placeholder="100% Cotton Sateen, 300 thread count"
+          className="w-full border border-gray-300 px-4 py-2.5 text-sm outline-none focus:border-brand"
+        />
+      </div>
+
+      <div>
+        <label className="block text-xs tracking-wider text-gray-600 mb-1.5">
+          CARE INSTRUCTIONS{' '}
+          <span className="text-gray-400 normal-case tracking-normal">(wash / dry / iron)</span>
+        </label>
+        <textarea
+          value={care}
+          onChange={(e) => setCare(e.target.value)}
+          rows={3}
+          placeholder="Machine wash cold with like colors. Do not bleach. Tumble dry low. Warm iron if needed."
           className="w-full border border-gray-300 px-4 py-2.5 text-sm outline-none focus:border-brand resize-y"
         />
       </div>

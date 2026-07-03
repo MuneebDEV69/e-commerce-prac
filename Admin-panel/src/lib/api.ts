@@ -13,6 +13,8 @@ export type ApiProduct = {
   title: string
   slug: string
   description: string | null
+  material: string | null
+  care: string | null
   priceFrom: number
   stock: number
   published: boolean
@@ -99,5 +101,60 @@ export async function apiDeleteProduct(id: string) {
   return fetch(`${API_URL}/v1/products/${id}`, {
     method: 'DELETE',
     headers: await authHeaders()
+  })
+}
+
+// ── Orders (admin) ──
+export type ApiOrder = {
+  id: string
+  customerName: string
+  customerPhone: string
+  customerEmail: string | null
+  shippingAddress: string
+  city: string | null
+  postalCode: string | null
+  paymentMethod: string
+  paymentRef: string | null
+  notes: string | null
+  status: string
+  totalAmount: number
+  createdAt: string
+  items: {
+    id: string
+    quantity: number
+    unitPrice: number
+    product: { title: string; slug: string; mediaUrls: string[] } | null
+  }[]
+}
+
+export async function fetchOrders(): Promise<ApiOrder[]> {
+  const res = await fetch(`${API_URL}/v1/orders`, { headers: await authHeaders(), cache: 'no-store' })
+  if (!res.ok) throw new Error('Failed to load orders')
+  return res.json()
+}
+
+export async function apiUpdateOrderStatus(id: string, status: string) {
+  return fetch(`${API_URL}/v1/orders/${id}/status`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...(await authHeaders()) },
+    body: JSON.stringify({ status })
+  })
+}
+
+// ── Landing page (block-based CMS) ──
+export type LandingBlock = { id: string; type: string; content: Record<string, unknown> }
+
+export async function fetchLandingSections(): Promise<LandingBlock[]> {
+  const res = await fetch(`${API_URL}/v1/landing`, { cache: 'no-store' })
+  if (!res.ok) throw new Error('Failed to load landing content')
+  const data = await res.json()
+  return Array.isArray(data?.sections) ? data.sections : []
+}
+
+export async function apiUpdateLanding(sections: LandingBlock[]) {
+  return fetch(`${API_URL}/v1/landing`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', ...(await authHeaders()) },
+    body: JSON.stringify({ sections })
   })
 }

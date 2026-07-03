@@ -1,5 +1,6 @@
 import SubCategorySlider from '../../components/shop/SubCategorySlider'
 import ShopExperience from '../../components/shop/ShopExperience'
+import AdminBackBar from '../../components/shop/AdminBackBar'
 import { fetchProducts } from '@/lib/api'
 
 // ISR: serve cached HTML instantly, revalidate in the background.
@@ -22,6 +23,7 @@ export default async function ShopPage() {
 
   return (
     <div className="pb-12">
+      <AdminBackBar />
       <SubCategorySlider />
       <ShopExperience products={cards} />
     </div>

@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { Plus, ListChecks, ShoppingBag } from 'lucide-react'
+import { Plus, ListChecks, ShoppingBag, ClipboardList, LayoutTemplate } from 'lucide-react'
 
 export const dynamic = 'force-dynamic'
 export const metadata = { title: 'Dashboard — Admin' }
@@ -37,8 +37,34 @@ export default function DashboardPage() {
           </span>
         </Link>
 
+        <Link
+          href="/orders"
+          className="flex items-center gap-4 border border-gray-200 bg-white p-6 hover:border-brand hover:bg-cream transition-colors"
+        >
+          <span className="grid place-items-center w-12 h-12 rounded-full bg-brand/10 text-brand">
+            <ClipboardList size={22} />
+          </span>
+          <span>
+            <span className="block text-sm tracking-wider text-gray-800">Manage Orders</span>
+            <span className="block text-xs text-gray-500">Verify payments &amp; approve orders</span>
+          </span>
+        </Link>
+
+        <Link
+          href="/landing-page"
+          className="flex items-center gap-4 border border-gray-200 bg-white p-6 hover:border-brand hover:bg-cream transition-colors"
+        >
+          <span className="grid place-items-center w-12 h-12 rounded-full bg-brand/10 text-brand">
+            <LayoutTemplate size={22} />
+          </span>
+          <span>
+            <span className="block text-sm tracking-wider text-gray-800">Manage Landing Page</span>
+            <span className="block text-xs text-gray-500">Edit hero images, reels &amp; text</span>
+          </span>
+        </Link>
+
         <a
-          href={`${process.env.NEXT_PUBLIC_STOREFRONT_URL ?? 'http://localhost:3000'}/shop`}
+          href={`${process.env.NEXT_PUBLIC_STOREFRONT_URL ?? 'http://localhost:3000'}/shop?admin=1`}
           target="_blank"
           rel="noopener noreferrer"
           className="flex items-center gap-4 border border-gray-200 bg-white p-6 hover:border-brand hover:bg-cream transition-colors"

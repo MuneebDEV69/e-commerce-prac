@@ -1,8 +1,8 @@
 import { Loader2 } from 'lucide-react'
 
 /**
- * Shown instantly during any route transition that doesn't have its own
- * loading.tsx — gives immediate feedback so the UI never feels frozen.
+ * Default route-transition loader (used by any page without its own loading.tsx).
+ * Spinner + wordmark so the user always sees the site is loading.
  */
 export default function Loading() {
   return (

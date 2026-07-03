@@ -3,6 +3,7 @@
 import { useState, type ReactNode } from 'react'
 import { Minus, Plus, ChevronDown } from 'lucide-react'
 import { type Product, formatPrice } from '../../lib/products'
+import { useCartStore } from '@/lib/cart'
 
 /** Pill selector — active = solid black, inactive = bordered white. */
 function PillGroup({
@@ -63,6 +64,24 @@ export default function BuyBox({ product }: { product: Product }) {
   const [color, setColor] = useState(product.colors[0] ?? '')
   const [qty, setQty] = useState(1)
   const [addOns, setAddOns] = useState<Set<string>>(new Set())
+  const addToCart = useCartStore((s) => s.add)
+  const openCart = useCartStore((s) => s.openCart)
+
+  const handleAddToCart = () => {
+    addToCart(
+      {
+        slug: product.slug,
+        title: product.title,
+        price: product.priceFrom,
+        image: product.image || product.gallery[0] || null,
+        size: size || undefined,
+        fabric: fabric || undefined,
+        color: color || undefined
+      },
+      qty
+    )
+    openCart()
+  }
 
   const toggleAddOn = (label: string) => {
     setAddOns((prev) => {
@@ -145,7 +164,10 @@ export default function BuyBox({ product }: { product: Product }) {
       )}
 
       {/* Action row */}
-      <button className="mt-7 w-full bg-brand text-white text-sm tracking-widest py-4 hover:bg-brand-dark transition-colors">
+      <button
+        onClick={handleAddToCart}
+        className="mt-7 w-full bg-brand text-white text-sm tracking-widest py-4 hover:bg-brand-dark transition-colors"
+      >
         ADD TO CART
       </button>
       <a
@@ -164,13 +186,17 @@ export default function BuyBox({ product }: { product: Product }) {
       <div className="mt-8">
         <Accordion title="PRODUCT DETAILS">
           <p>
-            {product.fabric ? `Fabric: ${product.fabric}. ` : ''}
+            {product.material ? `Material: ${product.material}. ` : ''}
             {product.category ? `Category: ${product.category}. ` : ''}
             {product.description}
           </p>
         </Accordion>
         <Accordion title="CARE INSTRUCTIONS">
-          <p>Machine wash cold with like colors. Do not bleach. Tumble dry low. Warm iron if needed.</p>
+          <p>
+            {product.care?.trim()
+              ? product.care
+              : 'Machine wash cold with like colors. Do not bleach. Tumble dry low. Warm iron if needed.'}
+          </p>
         </Accordion>
       </div>
     </div>

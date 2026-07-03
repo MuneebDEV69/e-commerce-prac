@@ -4,6 +4,7 @@ import Header from '../components/layout/Header'
 import Marquee from '../components/layout/Marquee'
 import Footer from '../components/layout/Footer'
 import WhatsAppButton from '../components/layout/WhatsAppButton'
+import CartDrawer from '../components/cart/CartDrawer'
 
 export const metadata = {
   title: 'Araish — Premium Luxury Bedding',
@@ -21,6 +22,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
         <Footer />
         <WhatsAppButton />
+        <CartDrawer />
       </body>
     </html>
   )

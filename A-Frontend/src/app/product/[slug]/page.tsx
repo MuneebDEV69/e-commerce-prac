@@ -27,6 +27,8 @@ function toViewModel(p: NonNullable<Awaited<ReturnType<typeof loadProduct>>>): P
     fabric: '',
     color: '',
     description: p.description ?? '',
+    material: p.material ?? '',
+    care: p.care ?? '',
     // Variants aren't modelled per-product yet — selectors stay hidden until they are.
     sizes: [],
     fabrics: [],

@@ -1,6 +1,7 @@
 export default function ProductsLoading() {
   return (
     <div className="max-w-5xl mx-auto px-4 py-12 animate-pulse">
+      <p className="text-sm tracking-wider text-gray-400 mb-6">Products page is loading…</p>
       <div className="flex items-center justify-between mb-8">
         <div>
           <div className="h-3 w-28 bg-gray-200 rounded" />

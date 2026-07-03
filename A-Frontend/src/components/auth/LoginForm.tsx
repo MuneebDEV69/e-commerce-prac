@@ -35,10 +35,16 @@ export default function LoginForm({
       return
     }
 
-    // Hard navigation (not router.push): forces a full page load so the server
-    // reliably reads the freshly-set auth cookie. A soft push can race the cookie
-    // write and bounce back to /login (the "stuck on Signing in" bug).
-    window.location.assign(redirectTo)
+    // Password OK → second factor. Email a 6-digit code and move to /verify.
+    await fetch('/api/auth/otp/send', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email })
+    }).catch(() => {})
+
+    const params = new URLSearchParams({ email, redirect: redirectTo })
+    // Hard navigation so the freshly-set auth cookie is reliably read server-side.
+    window.location.assign(`/verify?${params.toString()}`)
   }
 
   return (

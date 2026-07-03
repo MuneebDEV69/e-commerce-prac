@@ -3,6 +3,10 @@ import express from 'express'
 import cors from 'cors'
 import productsRouter from './routes/products'
 import categoriesRouter from './routes/categories'
+import ordersRouter from './routes/orders'
+import payfastRouter from './routes/payfast'
+import landingRouter from './routes/landing'
+import authRouter from './routes/auth'
 import meRouter from './routes/me'
 
 const app = express()
@@ -29,6 +33,8 @@ app.use(
 )
 
 app.use(express.json())
+// PayFast posts its IPN callback as form-urlencoded, so parse that too.
+app.use(express.urlencoded({ extended: true }))
 
 app.get('/health', (_req, res) => {
   res.json({ ok: true, service: 'a-backend', time: new Date().toISOString() })
@@ -36,6 +42,10 @@ app.get('/health', (_req, res) => {
 
 app.use('/v1/products', productsRouter)
 app.use('/v1/categories', categoriesRouter)
+app.use('/v1/orders', ordersRouter)
+app.use('/v1/payfast', payfastRouter)
+app.use('/v1/landing', landingRouter)
+app.use('/v1/auth', authRouter)
 app.use('/v1/me', meRouter)
 
 const PORT = Number(process.env.PORT ?? 4000)

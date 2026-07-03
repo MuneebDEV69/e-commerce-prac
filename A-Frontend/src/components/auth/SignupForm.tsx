@@ -39,6 +39,13 @@ export default function SignupForm() {
       return
     }
 
+    // Send the welcome email (with account details) — fire-and-forget.
+    await fetch('/api/auth/welcome', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password })
+    }).catch(() => {})
+
     // Requested flow: signup → go to login and sign in explicitly.
     // Clear any auto-created session (when email confirmation is off).
     await supabase.auth.signOut()

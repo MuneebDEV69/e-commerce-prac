@@ -64,6 +64,8 @@ router.post('/', requireAdmin, async (req, res) => {
       title: data.title,
       slug,
       description: data.description || null,
+      material: data.material || null,
+      care: data.care || null,
       priceFrom: data.priceFrom,
       stock: data.stock,
       published: true,
@@ -91,6 +93,8 @@ router.put('/:id', requireAdmin, async (req, res) => {
       data: {
         title: data.title,
         description: data.description || null,
+        material: data.material || null,
+        care: data.care || null,
         priceFrom: data.priceFrom,
         stock: data.stock,
         mediaUrls: data.mediaUrls,
