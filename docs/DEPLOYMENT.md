@@ -46,8 +46,21 @@ Render Dashboard → **New → Blueprint** → select this repo → it reads `re
 | `DIRECT_URL` | Supabase **direct** URL (port 5432) |
 | `SUPABASE_URL` | `https://PROJECT.supabase.co` |
 | `SUPABASE_ANON_KEY` | your anon key |
-| `FRONTEND_URL` | the storefront Vercel URL (add after step 2) |
-| `ADMIN_URL` | the admin Vercel URL (add after step 2) |
+| `FRONTEND_URL` | `https://araish-public-front.vercel.app` |
+| `ADMIN_URL` | `https://araish-admin-panel.vercel.app` |
+| `SMTP_USER` | your Gmail address (e.g. `muneebarif226@gmail.com`) — **required for emails/OTP** |
+| `SMTP_PASS` | your 16-char Gmail **App Password** (no spaces) |
+| `MAIL_FROM` | `Muneeb Ki Araish <muneebarif226@gmail.com>` |
+| `ADMIN_EMAIL` | where order copies go (same Gmail is fine) |
+| `OTP_EXP_MIN` | `5` |
+| `BACKEND_PUBLIC_URL` | this Render URL, e.g. `https://araish-backend.onrender.com` (for PayFast callback) |
+| `PAYFAST_MODE` | `sandbox` (leave PayFast keys blank to keep card = manual bank transfer) |
+| `PAYFAST_MERCHANT_ID` / `PAYFAST_SECURED_KEY` / `PAYFAST_STORE_ID` | *(optional)* from GoPayFast |
+
+> **Without `SMTP_USER` + `SMTP_PASS` the deployed backend cannot send login codes
+> (OTP) or order emails** — the code no-ops mail when they're missing. This is the
+> #1 reason "it works locally but not live": the secrets live in your gitignored
+> local `.env` and were never added to Render.
 
 → After deploy you get a URL like `https://araish-backend.onrender.com`. Test `…/health`.
 
@@ -71,9 +84,16 @@ Create **two** Vercel projects from this repo. Vercel auto-detects the npm-works
 Env vars:
 | Key | Value |
 |-----|-------|
-| `API_URL` | `https://araish-backend.onrender.com` |
+| `API_URL` | `https://araish-backend.onrender.com` — **the Render backend URL (NOT localhost)** |
 | `NEXT_PUBLIC_SUPABASE_URL` | `https://PROJECT.supabase.co` |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | your anon key |
+| `NEXT_PUBLIC_ADMIN_URL` | `https://araish-admin-panel.vercel.app` (for the "Back to Dashboard" button) |
+
+> **`API_URL` is the #1 fix for "works locally, not live."** Every order, login
+> code (OTP), welcome email and landing-page fetch goes through the Next server →
+> your backend at `API_URL`. If it's unset on Vercel it defaults to
+> `http://127.0.0.1:4000`, which doesn't exist in the cloud, so all of it fails
+> silently. Set it on **both** Vercel projects.
 
 ### Project B — Admin
 | Setting | Value |
@@ -86,10 +106,10 @@ Env vars:
 Env vars:
 | Key | Value |
 |-----|-------|
-| `API_URL` | `https://araish-backend.onrender.com` |
+| `API_URL` | `https://araish-backend.onrender.com` — **the Render backend URL (NOT localhost)** |
 | `NEXT_PUBLIC_SUPABASE_URL` | `https://PROJECT.supabase.co` |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | your anon key |
-| `NEXT_PUBLIC_STOREFRONT_URL` | the storefront Vercel URL |
+| `NEXT_PUBLIC_STOREFRONT_URL` | `https://araish-public-front.vercel.app` |
 
 > `@ecom/shared` (in `packages/shared/`) is picked up automatically — Vercel installs the whole workspace from the repo root, so no extra config is needed. A change to `packages/shared/` triggers rebuilds of both apps.
 

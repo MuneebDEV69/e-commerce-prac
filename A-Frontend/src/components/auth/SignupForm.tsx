@@ -30,7 +30,12 @@ export default function SignupForm() {
     const { error } = await supabase.auth.signUp({
       email,
       password,
-      options: { data: { name } }
+      options: {
+        data: { name },
+        // Send Supabase's confirmation link back to THIS site (not localhost).
+        // Also add this URL under Supabase → Auth → URL Configuration → Redirect URLs.
+        emailRedirectTo: `${window.location.origin}/login?confirmed=1`
+      }
     })
 
     if (error) {

@@ -2,12 +2,21 @@ import { Router } from 'express'
 import crypto from 'crypto'
 import { z } from 'zod'
 import { prisma } from '../lib/prisma'
-import { welcomeEmail, otpEmail } from '../lib/mailer'
+import { welcomeEmail, otpEmail, sendMailRaw, mailProvider, ADMIN_EMAIL } from '../lib/mailer'
 
 const router = Router()
 
 const OTP_EXP_MIN = Number(process.env.OTP_EXP_MIN ?? 5)
 const emailSchema = z.string().trim().email()
+
+// ── Diagnostic: send a real test email to the store's own admin address ──
+// Safe (fixed recipient = ADMIN_EMAIL, can't be used to spam others). Returns the
+// actual provider result so you can tell if email works in production.
+router.post('/test-email', async (_req, res) => {
+  if (!ADMIN_EMAIL) return res.status(400).json({ ok: false, provider: mailProvider, error: 'ADMIN_EMAIL not set.' })
+  const result = await sendMailRaw(ADMIN_EMAIL, 'Test email — Muneeb Ki Araish', '<p>If you can read this, live email is working. 🎉</p>')
+  res.status(result.ok ? 200 : 500).json({ provider: mailProvider, to: ADMIN_EMAIL, ...result })
+})
 
 // ── Welcome email after account creation ──
 router.post('/welcome', async (req, res) => {

@@ -33,3 +33,32 @@ services:
         sync: false
       - key: ADMIN_URL
         sync: false
+      # ── Email — REQUIRED for OTP + order emails to work live ──
+      # Prefer Resend (HTTP) — Render's free tier BLOCKS outbound SMTP ports, so
+      # Gmail SMTP will time out here. Set RESEND_API_KEY and it's used automatically.
+      - key: RESEND_API_KEY
+        sync: false
+      - key: SMTP_USER
+        sync: false
+      - key: SMTP_PASS
+        sync: false
+      - key: MAIL_FROM
+        sync: false
+      - key: ADMIN_EMAIL
+        sync: false
+      - key: OTP_EXP_MIN
+        value: "5"
+      # ── This backend's own public URL (used for the PayFast callback) ──
+      - key: BACKEND_PUBLIC_URL
+        sync: false
+      # ── PayFast (optional — leave blank to keep card payments in manual mode) ──
+      - key: PAYFAST_MODE
+        value: "sandbox"
+      - key: PAYFAST_MERCHANT_ID
+        sync: false
+      - key: PAYFAST_SECURED_KEY
+        sync: false
+      - key: PAYFAST_MERCHANT_NAME
+        value: "Muneeb Ki Araish"
+      - key: PAYFAST_STORE_ID
+        sync: false

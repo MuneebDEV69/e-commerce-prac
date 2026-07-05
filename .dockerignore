@@ -1,18 +1,42 @@
 # Keep the build context small & fast — these are never needed inside images.
+# NOTE: the build CONTEXT is the repo root for all three services (see
+# docker-compose.yml `context: .`), so THIS file governs every build. Per-service
+# .dockerignore files would be ignored, so we keep one authoritative list here.
+
+# Dependencies & build outputs (installed/produced inside the image instead)
 **/node_modules
 **/.next
 **/dist
 **/build
+**/out
 **/.turbo
+**/.cache
+**/.vercel
+
+# VCS & editor
 .git
 .gitignore
+**/.vscode
+**/.idea
+
+# Secrets & local env (NEXT_PUBLIC_* arrive as build args; runtime env via compose)
 **/.env
 **/.env.*
 !**/.env.example
+
+# Test/coverage & lint caches
+**/coverage
+**/.nyc_output
+**/.eslintcache
+
+# Logs & OS cruft
 **/*.log
 npm-debug.log*
 **/.DS_Store
-**/.vscode
+**/Thumbs.db
+
+# Docs & misc that never affect a build
 docs
 scripts/*.md
 **/*.tsbuildinfo
+**/*.local

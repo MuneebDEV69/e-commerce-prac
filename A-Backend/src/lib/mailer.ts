@@ -1,40 +1,58 @@
 import nodemailer from 'nodemailer'
 
 /**
- * Email sender (Gmail SMTP via an app password).
- *
- * Credentials come from env (SMTP_USER / SMTP_PASS). If they're missing we log and
- * no-op instead of throwing, so a missing config never breaks order placement.
+ * Email sender with two transports:
+ *   1. Resend (HTTP API) — used if RESEND_API_KEY is set. HTTP works on hosts that
+ *      block outbound SMTP ports (Render's free tier blocks 25/465/587 — this is
+ *      the usual reason Gmail SMTP "works locally but not live").
+ *   2. Gmail SMTP (nodemailer) — fallback, for hosts that allow SMTP.
+ * If neither is configured we log and no-op so a missing config never breaks a request.
  */
+const RESEND_API_KEY = process.env.RESEND_API_KEY ?? ''
 const SMTP_USER = process.env.SMTP_USER ?? ''
 const SMTP_PASS = process.env.SMTP_PASS ?? ''
-const MAIL_FROM = process.env.MAIL_FROM ?? `Muneeb Ki Araish <${SMTP_USER}>`
+const MAIL_FROM = process.env.MAIL_FROM ?? `Muneeb Ki Araish <${SMTP_USER || 'onboarding@resend.dev'}>`
 export const ADMIN_EMAIL = process.env.ADMIN_EMAIL ?? SMTP_USER
 const STORE_NAME = 'Muneeb Ki Araish'
 
-const enabled = Boolean(SMTP_USER && SMTP_PASS)
+export const mailProvider: 'resend' | 'smtp' | 'none' = RESEND_API_KEY ? 'resend' : SMTP_USER && SMTP_PASS ? 'smtp' : 'none'
 
-const transporter = enabled
-  ? nodemailer.createTransport({
-      host: 'smtp.gmail.com',
-      port: 465,
-      secure: true,
-      auth: { user: SMTP_USER, pass: SMTP_PASS }
-    })
-  : null
+const transporter =
+  mailProvider === 'smtp'
+    ? nodemailer.createTransport({ host: 'smtp.gmail.com', port: 465, secure: true, auth: { user: SMTP_USER, pass: SMTP_PASS } })
+    : null
+
+/** Low-level send that RETURNS the result (used by the /health test endpoint). */
+export async function sendMailRaw(to: string, subject: string, html: string): Promise<{ ok: boolean; error?: string }> {
+  if (!to) return { ok: false, error: 'No recipient.' }
+  try {
+    if (mailProvider === 'resend') {
+      const res = await fetch('https://api.resend.com/emails', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${RESEND_API_KEY}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ from: MAIL_FROM, to: [to], subject, html })
+      })
+      if (!res.ok) {
+        const body = await res.text().catch(() => '')
+        return { ok: false, error: `Resend ${res.status}: ${body.slice(0, 200)}` }
+      }
+      return { ok: true }
+    }
+    if (transporter) {
+      await transporter.sendMail({ from: MAIL_FROM, to, subject, html })
+      return { ok: true }
+    }
+    return { ok: false, error: 'No mail provider configured (set RESEND_API_KEY or SMTP_USER/SMTP_PASS).' }
+  } catch (e) {
+    return { ok: false, error: (e as Error).message }
+  }
+}
 
 /** Fire-and-forget send. Never throws — email failure must not fail the request. */
 export async function sendMail(to: string, subject: string, html: string): Promise<void> {
-  if (!transporter || !to) {
-    if (!enabled) console.warn('[mailer] SMTP not configured — skipping email:', subject)
-    return
-  }
-  try {
-    await transporter.sendMail({ from: MAIL_FROM, to, subject, html })
-    console.log(`[mailer] sent "${subject}" → ${to}`)
-  } catch (e) {
-    console.error(`[mailer] failed "${subject}" → ${to}:`, e)
-  }
+  const r = await sendMailRaw(to, subject, html)
+  if (r.ok) console.log(`[mailer:${mailProvider}] sent "${subject}" → ${to}`)
+  else console.error(`[mailer:${mailProvider}] failed "${subject}" → ${to}: ${r.error}`)
 }
 
 const money = (n: number) => `Rs.${n.toLocaleString('en-US')}`

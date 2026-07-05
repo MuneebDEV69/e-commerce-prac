@@ -1,6 +1,7 @@
 import 'dotenv/config'
 import express from 'express'
 import cors from 'cors'
+import { mailProvider } from './lib/mailer'
 import productsRouter from './routes/products'
 import categoriesRouter from './routes/categories'
 import ordersRouter from './routes/orders'
@@ -37,7 +38,9 @@ app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 
 app.get('/health', (_req, res) => {
-  res.json({ ok: true, service: 'a-backend', time: new Date().toISOString() })
+  // `mail` tells you at a glance whether email is configured in THIS environment:
+  // "resend" or "smtp" = good; "none" = no email will send (set the env vars).
+  res.json({ ok: true, service: 'a-backend', time: new Date().toISOString(), mail: mailProvider })
 })
 
 app.use('/v1/products', productsRouter)
