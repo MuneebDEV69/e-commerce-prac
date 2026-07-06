@@ -12,16 +12,35 @@
     "packages/*"
   ],
   "scripts": {
+    "//": "── Daily development (NO Docker): hot-reload servers ──",
     "dev": "concurrently -n API,WEB,ADMIN -c blue,magenta,green \"npm:dev:backend\" \"npm:dev:frontend\" \"npm:dev:admin\"",
     "dev:frontend": "cd A-Frontend && next dev",
     "dev:backend": "cd A-Backend && tsx watch src/index.ts",
     "dev:admin": "cd Admin-panel && next dev -p 3001",
+
+    "//build": "── Build / type-check / lint (CI + pre-push) ──",
+    "build": "npm run build:backend && npm run build:frontend && npm run build:admin",
     "build:frontend": "cd A-Frontend && next build",
-    "build:backend": "cd A-Backend && tsc",
+    "build:backend": "cd A-Backend && tsc --noEmit",
     "build:admin": "cd Admin-panel && next build",
+    "lint": "npm run lint:frontend && npm run lint:admin && npm run build:backend",
+    "lint:frontend": "cd A-Frontend && next lint",
+    "lint:admin": "cd Admin-panel && next lint",
+    "test": "echo \"No automated tests configured yet.\" && exit 0",
+
+    "//start": "── Production-style local start (no watch) ──",
     "start:frontend": "cd A-Frontend && next start",
     "start:backend": "cd A-Backend && tsx src/index.ts",
     "start:admin": "cd Admin-panel && next start -p 3001",
+
+    "//docker": "── Docker: ONLY for production-like verification, not daily dev ──",
+    "docker": "docker compose up --build",
+    "docker:build": "docker compose build",
+    "docker:up": "docker compose up -d",
+    "docker:down": "docker compose down",
+    "docker:logs": "docker compose logs -f",
+
+    "//db": "── Database (Prisma → Supabase) ──",
     "db:seed": "cd A-Backend && prisma db seed",
     "db:push": "prisma db push --schema=A-Backend/prisma/schema.prisma",
     "db:studio": "prisma studio --schema=A-Backend/prisma/schema.prisma",

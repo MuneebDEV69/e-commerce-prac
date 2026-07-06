@@ -1,3 +1,6 @@
+'use client'
+
+import { useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { ImageOff } from 'lucide-react'
@@ -8,24 +11,37 @@ export type ShopCard = {
   title: string
   priceFrom: number
   image: string | null
+  category?: string | null
+  inStock?: boolean
 }
 
 /**
  * Clean product card — image (first media URL), title, "From <price>".
- * Falls back to a neutral placeholder when a product has no media yet.
+ * The image area shows a shimmering skeleton until the (remote Supabase) image
+ * finishes loading, so cards never sit as empty boxes. Falls back to a neutral
+ * placeholder when a product has no media.
  */
 export default function ProductCard({ product }: { product: ShopCard }) {
+  const [loaded, setLoaded] = useState(false)
+
   return (
     <Link href={`/product/${product.slug}`} className="group block">
       <div className="relative aspect-[4/5] w-full overflow-hidden bg-cream">
         {product.image ? (
-          <Image
-            src={product.image}
-            alt={product.title}
-            fill
-            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
-            className="object-cover transition-transform duration-500 group-hover:scale-105"
-          />
+          <>
+            {/* Shimmer placeholder until the image loads */}
+            {!loaded && <div className="absolute inset-0 bg-gray-200 animate-pulse" />}
+            <Image
+              src={product.image}
+              alt={product.title}
+              fill
+              sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+              onLoad={() => setLoaded(true)}
+              className={`object-cover transition-[opacity,transform] duration-500 group-hover:scale-105 ${
+                loaded ? 'opacity-100' : 'opacity-0'
+              }`}
+            />
+          </>
         ) : (
           <div className="absolute inset-0 grid place-items-center text-gray-300">
             <ImageOff size={32} strokeWidth={1.5} />

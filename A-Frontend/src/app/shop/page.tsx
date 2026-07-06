@@ -18,7 +18,10 @@ export default async function ShopPage() {
     slug: p.slug,
     title: p.title,
     priceFrom: p.priceFrom,
-    image: p.mediaUrls[0] ?? null
+    image: p.mediaUrls[0] ?? null,
+    // Only DB-backed facets are exposed to the shop filters (category + stock).
+    category: p.category?.name ?? null,
+    inStock: p.stock > 0
   }))
 
   return (
