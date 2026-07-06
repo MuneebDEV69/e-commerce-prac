@@ -11,7 +11,10 @@ export function friendlyAuthError(message: string): string {
   if (
     m.includes('already registered') ||
     m.includes('already been registered') ||
-    m.includes('user already')
+    m.includes('user already') ||
+    m.includes('already exists') ||
+    m.includes('duplicate key') ||
+    m.includes('users_email_key')
   ) {
     return 'An account with this email already exists. Please sign in instead.'
   }
@@ -29,8 +32,10 @@ export function friendlyAuthError(message: string): string {
     return 'Could not send the confirmation email (Supabase’s email limit was hit). Turn off “Confirm email” in Supabase → Authentication → Providers → Email, then try again.'
   }
   // Empty / unhelpful payloads (e.g. "{}") — never show raw braces to the user.
+  // The most common cause of an unparseable signup error is an email that already
+  // exists, so we point the user to sign in.
   if (!raw || raw === '{}' || raw === '[object Object]') {
-    return 'Something went wrong while creating your account. Please wait a minute and try again.'
+    return 'Could not create the account — an account with this email may already exist, so try signing in. Otherwise please try again in a minute.'
   }
   return raw
 }
