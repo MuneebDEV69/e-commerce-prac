@@ -34,8 +34,12 @@ services:
       - key: ADMIN_URL
         sync: false
       # ── Email — REQUIRED for OTP + order emails to work live ──
-      # Prefer Resend (HTTP) — Render's free tier BLOCKS outbound SMTP ports, so
-      # Gmail SMTP will time out here. Set RESEND_API_KEY and it's used automatically.
+      # Render's free tier BLOCKS outbound SMTP, so use an HTTP provider:
+      #  • BREVO_API_KEY  → emails ANY user with just a verified sender email (no domain). Preferred.
+      #  • RESEND_API_KEY → needs a verified DOMAIN to email arbitrary recipients.
+      # Whichever key is set is used automatically (Brevo takes priority).
+      - key: BREVO_API_KEY
+        sync: false
       - key: RESEND_API_KEY
         sync: false
       - key: SMTP_USER

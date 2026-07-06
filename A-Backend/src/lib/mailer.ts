@@ -1,13 +1,18 @@
 import nodemailer from 'nodemailer'
 
 /**
- * Email sender with two transports:
- *   1. Resend (HTTP API) — used if RESEND_API_KEY is set. HTTP works on hosts that
- *      block outbound SMTP ports (Render's free tier blocks 25/465/587 — this is
- *      the usual reason Gmail SMTP "works locally but not live").
- *   2. Gmail SMTP (nodemailer) — fallback, for hosts that allow SMTP.
- * If neither is configured we log and no-op so a missing config never breaks a request.
+ * Email sender with three transports (first one configured wins):
+ *   1. Brevo (HTTP API, BREVO_API_KEY) — sends to ANY recipient once you verify a
+ *      single sender email (no domain needed). Best free option for emailing all
+ *      users without owning a domain.
+ *   2. Resend (HTTP API, RESEND_API_KEY) — needs a VERIFIED DOMAIN to email arbitrary
+ *      recipients; without one its test address only reaches your own account email.
+ *   3. Gmail SMTP (nodemailer) — works locally, but Render's free tier blocks SMTP
+ *      ports, so it won't send in that environment.
+ * HTTP providers (Brevo/Resend) are used because they work where SMTP is blocked.
+ * If none is configured we log and no-op so a missing config never breaks a request.
  */
+const BREVO_API_KEY = process.env.BREVO_API_KEY ?? ''
 const RESEND_API_KEY = process.env.RESEND_API_KEY ?? ''
 const SMTP_USER = process.env.SMTP_USER ?? ''
 const SMTP_PASS = process.env.SMTP_PASS ?? ''
@@ -15,17 +20,37 @@ const MAIL_FROM = process.env.MAIL_FROM ?? `Muneeb Ki Araish <${SMTP_USER || 'on
 export const ADMIN_EMAIL = process.env.ADMIN_EMAIL ?? SMTP_USER
 const STORE_NAME = 'Muneeb Ki Araish'
 
-export const mailProvider: 'resend' | 'smtp' | 'none' = RESEND_API_KEY ? 'resend' : SMTP_USER && SMTP_PASS ? 'smtp' : 'none'
+export const mailProvider: 'brevo' | 'resend' | 'smtp' | 'none' =
+  BREVO_API_KEY ? 'brevo' : RESEND_API_KEY ? 'resend' : SMTP_USER && SMTP_PASS ? 'smtp' : 'none'
 
 const transporter =
   mailProvider === 'smtp'
     ? nodemailer.createTransport({ host: 'smtp.gmail.com', port: 465, secure: true, auth: { user: SMTP_USER, pass: SMTP_PASS } })
     : null
 
+/** Split "Name <email>" (or a bare address) into { name, email } for Brevo. */
+function parseFrom(v: string): { name: string; email: string } {
+  const m = v.match(/^\s*(.*?)\s*<([^>]+)>\s*$/)
+  if (m) return { name: m[1] || STORE_NAME, email: m[2].trim() }
+  return { name: STORE_NAME, email: v.trim() }
+}
+
 /** Low-level send that RETURNS the result (used by the /health test endpoint). */
 export async function sendMailRaw(to: string, subject: string, html: string): Promise<{ ok: boolean; error?: string }> {
   if (!to) return { ok: false, error: 'No recipient.' }
   try {
+    if (mailProvider === 'brevo') {
+      const res = await fetch('https://api.brevo.com/v3/smtp/email', {
+        method: 'POST',
+        headers: { 'api-key': BREVO_API_KEY, 'Content-Type': 'application/json', accept: 'application/json' },
+        body: JSON.stringify({ sender: parseFrom(MAIL_FROM), to: [{ email: to }], subject, htmlContent: html })
+      })
+      if (!res.ok) {
+        const body = await res.text().catch(() => '')
+        return { ok: false, error: `Brevo ${res.status}: ${body.slice(0, 200)}` }
+      }
+      return { ok: true }
+    }
     if (mailProvider === 'resend') {
       const res = await fetch('https://api.resend.com/emails', {
         method: 'POST',
@@ -42,7 +67,7 @@ export async function sendMailRaw(to: string, subject: string, html: string): Pr
       await transporter.sendMail({ from: MAIL_FROM, to, subject, html })
       return { ok: true }
     }
-    return { ok: false, error: 'No mail provider configured (set RESEND_API_KEY or SMTP_USER/SMTP_PASS).' }
+    return { ok: false, error: 'No mail provider configured (set BREVO_API_KEY, RESEND_API_KEY, or SMTP_USER/SMTP_PASS).' }
   } catch (e) {
     return { ok: false, error: (e as Error).message }
   }
