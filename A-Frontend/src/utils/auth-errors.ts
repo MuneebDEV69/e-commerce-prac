@@ -1,6 +1,7 @@
 /** Convert Supabase's terse/security-generic auth errors into clear messages. */
 export function friendlyAuthError(message: string): string {
-  const m = message.toLowerCase()
+  const raw = (message ?? '').trim()
+  const m = raw.toLowerCase()
   if (m.includes('invalid login credentials')) {
     return 'Incorrect email or password. If you don’t have an account yet, please sign up.'
   }
@@ -17,5 +18,19 @@ export function friendlyAuthError(message: string): string {
   if (m.includes('password should be at least')) {
     return 'Password must be at least 6 characters.'
   }
-  return message
+  // Supabase's built-in email is rate-limited (free tier); when it's exhausted or
+  // misconfigured, signUp fails while "Confirm email" is on. Guide the fix.
+  if (
+    m.includes('error sending') ||
+    m.includes('confirmation email') ||
+    m.includes('rate limit') ||
+    m.includes('over_email_send')
+  ) {
+    return 'Could not send the confirmation email (Supabase’s email limit was hit). Turn off “Confirm email” in Supabase → Authentication → Providers → Email, then try again.'
+  }
+  // Empty / unhelpful payloads (e.g. "{}") — never show raw braces to the user.
+  if (!raw || raw === '{}' || raw === '[object Object]') {
+    return 'Something went wrong while creating your account. Please wait a minute and try again.'
+  }
+  return raw
 }

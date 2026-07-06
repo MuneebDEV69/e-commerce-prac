@@ -39,7 +39,9 @@ export default function SignupForm() {
     })
 
     if (error) {
-      setError(friendlyAuthError(error.message))
+      // Full detail in the browser console (message/code/status) for diagnosis.
+      console.error('[signup] Supabase signUp error:', error)
+      setError(friendlyAuthError(error.message || error.code || `Sign up failed (status ${error.status ?? '?'}).`))
       setLoading(false)
       return
     }
