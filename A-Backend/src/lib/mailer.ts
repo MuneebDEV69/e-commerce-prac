@@ -19,6 +19,9 @@ const SMTP_PASS = process.env.SMTP_PASS ?? ''
 const MAIL_FROM = process.env.MAIL_FROM ?? `Muneeb Ki Araish <${SMTP_USER || 'onboarding@resend.dev'}>`
 export const ADMIN_EMAIL = process.env.ADMIN_EMAIL ?? SMTP_USER
 const STORE_NAME = 'Muneeb Ki Araish'
+// Used to turn relative product image paths (e.g. /images/x.jpg) into absolute
+// URLs so they load inside emails. Supabase upload URLs are already absolute.
+const STOREFRONT_URL = (process.env.FRONTEND_URL ?? '').replace(/\/$/, '')
 
 export const mailProvider: 'brevo' | 'resend' | 'smtp' | 'none' =
   BREVO_API_KEY ? 'brevo' : RESEND_API_KEY ? 'resend' : SMTP_USER && SMTP_PASS ? 'smtp' : 'none'
@@ -126,10 +129,17 @@ const orderDate = (o: OrderLike) =>
 function itemsTable(o: OrderLike): string {
   const rows = o.items
     .map((it) => {
-      const img = it.product?.mediaUrls?.[0]
-      const thumb = img
-        ? `<img src="${img}" width="46" height="46" alt="" style="width:46px;height:46px;object-fit:cover;border-radius:6px;border:1px solid #eee" />`
-        : ''
+      const raw = it.product?.mediaUrls?.[0] ?? ''
+      // Absolute (Supabase) URL as-is; relative path → prefix the storefront origin.
+      const src = raw.startsWith('http')
+        ? raw
+        : raw
+          ? `${STOREFRONT_URL}${raw.startsWith('/') ? '' : '/'}${raw}`
+          : ''
+      // Neutral square background so a blocked/slow image never shows a broken-icon box.
+      const thumb = src
+        ? `<img src="${src}" width="46" height="46" alt="${(it.product?.title ?? '').replace(/"/g, '')}" style="width:46px;height:46px;object-fit:cover;border-radius:6px;border:1px solid #eee;background:#f2ede6" />`
+        : `<div style="width:46px;height:46px;border-radius:6px;border:1px solid #eee;background:#f2ede6"></div>`
       return `<tr>
         <td style="padding:8px 0;border-bottom:1px solid #f0f0f0;width:56px">${thumb}</td>
         <td style="padding:8px 0;border-bottom:1px solid #f0f0f0">${it.product?.title ?? 'Product'} × ${it.quantity}</td>

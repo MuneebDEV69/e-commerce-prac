@@ -85,6 +85,10 @@ router.post('/', async (req, res) => {
   })
   const totalAmount = orderItems.reduce((sum, it) => sum + it.unitPrice * it.quantity, 0)
 
+  // COD needs no payment verification → confirm immediately. Online methods
+  // (CARD / JAZZCASH / EASYPAISA) start PENDING and require admin approval.
+  const isCOD = data.paymentMethod === 'COD'
+
   // Create the order AND decrement product stock atomically.
   const order = await prisma.$transaction(async (tx) => {
     const created = await tx.order.create({
@@ -98,7 +102,7 @@ router.post('/', async (req, res) => {
         paymentMethod: data.paymentMethod,
         paymentRef: data.paymentRef || null,
         notes: data.notes || null,
-        status: 'PENDING',
+        status: isCOD ? 'CONFIRMED' : 'PENDING',
         totalAmount,
         items: { create: orderItems }
       },
@@ -130,9 +134,11 @@ router.post('/', async (req, res) => {
     return created
   })
 
-  // Notify the customer (pending). Admin is notified in-dashboard (notifications
-  // bell), not by email. Fire-and-forget so a slow mail server never delays checkout.
-  void orderPendingCustomer(order)
+  // Email the customer: COD → straight "order confirmed"; online → "pending
+  // approval" (admin verifies the payment, then approves to send the confirmed
+  // email). Admin is notified in-dashboard (bell), not by email. Fire-and-forget.
+  if (isCOD) void orderConfirmedCustomer(order)
+  else void orderPendingCustomer(order)
 
   res.status(201).json({ ok: true, orderId: order.id, totalAmount: order.totalAmount })
 })
